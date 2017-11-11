@@ -1,0 +1,22 @@
+{
+  "name": "learning-threejs",
+  "version": "3.0.0",
+  "description": "Sample code for Learning Three.js third edition.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/josdirksen/learning-threejs-third.git"
+  },
+  "author": "Jos Dirksen",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/josdirksen/learning-threejs-third/issues"
+  },
+  "homepage": "https://github.com/josdirksen/learning-threejs-third#readme",
+  "dependencies": {
+    "three": "^0.88.0"
+  }
+}
