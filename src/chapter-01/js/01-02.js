@@ -16,7 +16,9 @@ function init() {
 
     // create the ground plane
     var planeGeometry = new THREE.PlaneGeometry(60, 20);
-    var planeMaterial = new THREE.MeshBasicMaterial({ color: 0xAAAAAA });
+    var planeMaterial = new THREE.MeshBasicMaterial({
+        color: 0xAAAAAA
+    });
     var plane = new THREE.Mesh(planeGeometry, planeMaterial);
 
     // rotate and position the plane
@@ -30,7 +32,10 @@ function init() {
 
     // create a cube
     var cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
-    var cubeMaterial = new THREE.MeshBasicMaterial({ color: 0xFF0000, wireframe: true });
+    var cubeMaterial = new THREE.MeshBasicMaterial({
+        color: 0xFF0000,
+        wireframe: true
+    });
     var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
 
     // position the cube
@@ -43,7 +48,10 @@ function init() {
 
     // create a sphere
     var sphereGeometry = new THREE.SphereGeometry(4, 20, 20);
-    var sphereMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true });
+    var sphereMaterial = new THREE.MeshBasicMaterial({
+        color: 0x7777FF,
+        wireframe: true
+    });
     var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 
     // position the sphere
