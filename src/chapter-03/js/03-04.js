@@ -70,20 +70,19 @@ function init() {
   var directionalLight = new THREE.DirectionalLight(pointColor);
   directionalLight.position.set(-40, 60, -10);
   directionalLight.castShadow = true;
-  directionalLight.shadowCameraNear = 2;
-  directionalLight.shadowCameraFar = 80;
-  directionalLight.shadowCameraLeft = -30;
-  directionalLight.shadowCameraRight = 30;
-  directionalLight.shadowCameraTop = 30;
-  directionalLight.shadowCameraBottom = -30;
+  directionalLight.shadow.camera.near = 2;
+  directionalLight.shadow.camera.far = 80;
+  directionalLight.shadow.camera.left = -30;
+  directionalLight.shadow.camera.right = 30;
+  directionalLight.shadow.camera.top = 30;
+  directionalLight.shadow.camera.bottom = -30;
 
   directionalLight.distance = 0;
   directionalLight.intensity = 0.5;
-  directionalLight.shadowMapHeight = 1024;
-  directionalLight.shadowMapWidth = 1024;
+  directionalLight.shadow.mapSize.width = 1024;
+  directionalLight.shadow.mapSize.height = 1024;
 
   scene.add(directionalLight);
-  console.log(directionalLight);
   var shadowCamera = new THREE.CameraHelper(directionalLight.shadow.camera)
 
   // add a small sphere simulating the pointlight

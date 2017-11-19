@@ -18,9 +18,13 @@ function initStats(type) {
 /**
  * Initialize a simple default renderer and binds it to the "webgl-output" dom
  * element.
+ * 
+ * @argument additionalProperties Additional properties to pass into the renderer
  */
-function initRenderer() {
-    var renderer = new THREE.WebGLRenderer();
+function initRenderer(additionalProperties) {
+
+    var props = (typeof additionalProperties !== 'undefined' && additionalProperties) ? additionalProperties : {};
+    var renderer = new THREE.WebGLRenderer(props);
 
     renderer.setClearColor(new THREE.Color(0x000000));
     renderer.setSize(window.innerWidth, window.innerHeight);
