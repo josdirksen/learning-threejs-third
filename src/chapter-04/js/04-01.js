@@ -160,7 +160,6 @@ function init() {
 
     }
 
-    scene.add(e);
   });
 
   gui.add(controls, 'switchRenderer');
