@@ -4,25 +4,14 @@ function init() {
   var stats = initStats();
   var renderer = initRenderer();
   var camera = initCamera();
+  var trackballControls = initTrackballControls(camera, renderer);
+  var clock = new THREE.Clock();
 
   // create a scene, that will hold all our elements such as objects, cameras and lights.
   var scene = new THREE.Scene();
 
   // add a simple scene
   addHouseAndTree(scene)
-
-  var clock = new THREE.Clock();
-  var trackballControls = new THREE.TrackballControls(camera, renderer.domElement);
-  trackballControls.rotateSpeed = 1.0;
-  trackballControls.zoomSpeed = 1.2;
-  trackballControls.panSpeed = 0.8;
-  trackballControls.noZoom = false;
-  trackballControls.noPan = false;
-  trackballControls.staticMoving = true;
-  trackballControls.dynamicDampingFactor = 0.3;
-  trackballControls.keys = [65, 83, 68];
-
-  // trackballControls.addEventListener('change', render);
 
   // add subtle ambient lighting
   var ambientLight = new THREE.AmbientLight("#0c0c0c");
