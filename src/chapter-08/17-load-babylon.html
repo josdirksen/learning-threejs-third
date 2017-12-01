@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Example 08.17 - Load babylon model </title>
+    <script type="text/javascript" src="../libs/three.js"></script>
+    <script type="text/javascript" src="../libs/BabylonLoader.js"></script>
+
+    <script type="text/javascript" src="../libs/stats.js"></script>
+    <script type="text/javascript" src="../libs/dat.gui.js"></script>
+    <script type="text/javascript" src="../libs/OrbitControls.js"></script>
+    <style>
+        body {
+            /* set margin to 0 and overflow to hidden, to go fullscreen */
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+<div id="Stats-output">
+</div>
+<!-- Div which will hold the Output -->
+<div id="WebGL-output">
+</div>
+
+<!-- Javascript code that runs our Three.js examples -->
+<script type="text/javascript">
+
+    // once everything is loaded, we run our Three.js stuff.
+    function init() {
+
+        var stats = initStats();
+
+
+        // create a scene, that will hold all our elements such as objects, cameras and lights.
+        var scene = new THREE.Scene();
+
+        // create a camera, which defines where we're looking at.
+        var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+        // create a render and set the size
+        var webGLRenderer = new THREE.WebGLRenderer();
+        webGLRenderer.setClearColor(new THREE.Color(0x000, 1.0));
+        webGLRenderer.setSize(window.innerWidth, window.innerHeight);
+        webGLRenderer.shadowMapEnabled = true;
+
+        // position and point the camera to the center of the scene
+        camera.position.x = 30;
+        camera.position.y = 30;
+        camera.position.z = 30;
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+        var orbit = new THREE.OrbitControls(camera);
+
+        var dir1 = new THREE.DirectionalLight();
+        dir1.position.set(-30, 30, -30);
+        scene.add(dir1);
+
+        var dir2 = new THREE.DirectionalLight();
+        dir2.position.set(-30, 30, 30);
+        scene.add(dir2);
+
+        var dir3 = new THREE.DirectionalLight();
+        dir3.position.set(30, 30, -30);
+        scene.add(dir3);
+
+        // add spotlight for the shadows
+        var spotLight = new THREE.SpotLight(0xffffff);
+        spotLight.position.set(30, 30, 30);
+        scene.add(spotLight);
+
+        // add the output of the renderer to the html element
+        document.getElementById("WebGL-output").appendChild(webGLRenderer.domElement);
+
+        // call the render function
+        var step = 0;
+
+
+        // setup the control gui
+        var controls = new function () {
+            // we need the first child, since it's a multimaterial
+
+
+        };
+
+        var gui = new dat.GUI();
+
+
+        var loader = new THREE.BabylonLoader();
+        var group = new THREE.Object3D();
+        loader.load("../assets/models/babylon/skull.babylon", function (loadedScene) {
+
+            // babylon loader contains a complete scene.
+            console.log(loadedScene.children[1].material = new THREE.MeshLambertMaterial());
+            scene = loadedScene;
+
+        });
+
+
+        render();
+
+
+        function render() {
+            stats.update();
+
+            orbit.update();
+
+            // render using requestAnimationFrame
+            requestAnimationFrame(render);
+            webGLRenderer.render(scene, camera);
+        }
+
+        function initStats() {
+
+            var stats = new Stats();
+            stats.setMode(0); // 0: fps, 1: ms
+
+            // Align top-left
+            stats.domElement.style.position = 'absolute';
+            stats.domElement.style.left = '0px';
+            stats.domElement.style.top = '0px';
+
+            document.getElementById("Stats-output").appendChild(stats.domElement);
+
+            return stats;
+        }
+    }
+    window.onload = init;
+</script>
+</body>
+</html>
