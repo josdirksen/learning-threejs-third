@@ -4,30 +4,30 @@
 
 <head>
     <title>Example 08.09 - Load stl model </title>
-    <script type="text/javascript" src="../libs/three.js"></script>
-    <script type="text/javascript" src="../libs/STLLoader.js"></script>
+    <script type="text/javascript" charset="UTF-8" src="../../libs/three/three.js"></script>
+    <script type="text/javascript" charset="UTF-8" src="../../libs/three/controls/TrackballControls.js"></script>
+    <script type="text/javascript" src="../../libs/util/Stats.js"></script>
+    <script type="text/javascript" src="../../libs/util/dat.gui.js"></script>
 
-    <script type="text/javascript" src="../libs/stats.js"></script>
-    <script type="text/javascript" src="../libs/dat.gui.js"></script>
-    <style>
-        body {
-            /* set margin to 0 and overflow to hidden, to go fullscreen */
-            margin: 0;
-            overflow: hidden;
-        }
-    </style>
+    <script type="text/javascript" src="../js/util.js"></script>
+    <script type="text/javascript" src="./js/07-10.js"></script>
+    <link rel="stylesheet" href="../../css/default.css">
 </head>
+
 <body>
+    <div id="webgl-output">
+        <script type="text/javascript">
+            (function () {
+                // your page initialization code here
+                // the DOM will be available here
+                init()
+            })();
+        </script>
+</body>
 
-<div id="Stats-output">
-</div>
-<!-- Div which will hold the Output -->
-<div id="WebGL-output">
-</div>
-
+</html>
 <!-- Javascript code that runs our Three.js examples -->
 <script type="text/javascript">
-
     // once everything is loaded, we run our Three.js stuff.
     function init() {
 
@@ -79,7 +79,9 @@
         var group = new THREE.Object3D();
         loader.load("../assets/models/SolidHead_2_lowPoly_42k.stl", function (geometry) {
             console.log(geometry);
-            var mat = new THREE.MeshLambertMaterial({color: 0x7777ff});
+            var mat = new THREE.MeshLambertMaterial({
+                color: 0x7777ff
+            });
             group = new THREE.Mesh(geometry, mat);
             group.rotation.x = -0.5 * Math.PI;
             group.scale.set(0.6, 0.6, 0.6);
@@ -121,4 +123,5 @@
     window.onload = init;
 </script>
 </body>
+
 </html>

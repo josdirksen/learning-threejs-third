@@ -4,31 +4,30 @@
 
 <head>
     <title>Example 08.11 - Load pdb model </title>
-    <script type="text/javascript" src="../libs/three.js"></script>
-    <script type="text/javascript" src="../libs/AWDLoader.js"></script>
+    <script type="text/javascript" charset="UTF-8" src="../../libs/three/three.js"></script>
+    <script type="text/javascript" charset="UTF-8" src="../../libs/three/controls/TrackballControls.js"></script>
+    <script type="text/javascript" src="../../libs/util/Stats.js"></script>
+    <script type="text/javascript" src="../../libs/util/dat.gui.js"></script>
 
-    <script type="text/javascript" src="../libs/stats.js"></script>
-    <script type="text/javascript" src="../libs/dat.gui.js"></script>
-    <script type="text/javascript" src="../libs/OrbitControls.js"></script>
-    <style>
-        body {
-            /* set margin to 0 and overflow to hidden, to go fullscreen */
-            margin: 0;
-            overflow: hidden;
-        }
-    </style>
+    <script type="text/javascript" src="../js/util.js"></script>
+    <script type="text/javascript" src="./js/07-10.js"></script>
+    <link rel="stylesheet" href="../../css/default.css">
 </head>
+
 <body>
+    <div id="webgl-output">
+        <script type="text/javascript">
+            (function () {
+                // your page initialization code here
+                // the DOM will be available here
+                init()
+            })();
+        </script>
+</body>
 
-<div id="Stats-output">
-</div>
-<!-- Div which will hold the Output -->
-<div id="WebGL-output">
-</div>
-
+</html>
 <!-- Javascript code that runs our Three.js examples -->
 <script type="text/javascript">
-
     // once everything is loaded, we run our Three.js stuff.
     function init() {
 
@@ -98,7 +97,9 @@
 
             model.traverse(function (child) {
                 if (child instanceof THREE.Mesh) {
-                    child.material = new THREE.MeshLambertMaterial({color: 0xaaaaaa});
+                    child.material = new THREE.MeshLambertMaterial({
+                        color: 0xaaaaaa
+                    });
                     console.log(child.geometry);
                 }
             });
@@ -146,4 +147,5 @@
     window.onload = init;
 </script>
 </body>
+
 </html>

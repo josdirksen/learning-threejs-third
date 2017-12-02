@@ -4,30 +4,30 @@
 
 <head>
     <title>Example 08.13 - Load ply model </title>
-    <script type="text/javascript" src="../libs/three.js"></script>
-    <script type="text/javascript" src="../libs/PLYLoader.js"></script>
+    <script type="text/javascript" charset="UTF-8" src="../../libs/three/three.js"></script>
+    <script type="text/javascript" charset="UTF-8" src="../../libs/three/controls/TrackballControls.js"></script>
+    <script type="text/javascript" src="../../libs/util/Stats.js"></script>
+    <script type="text/javascript" src="../../libs/util/dat.gui.js"></script>
 
-    <script type="text/javascript" src="../libs/stats.js"></script>
-    <script type="text/javascript" src="../libs/dat.gui.js"></script>
-    <style>
-        body {
-            /* set margin to 0 and overflow to hidden, to go fullscreen */
-            margin: 0;
-            overflow: hidden;
-        }
-    </style>
+    <script type="text/javascript" src="../js/util.js"></script>
+    <script type="text/javascript" src="./js/07-10.js"></script>
+    <link rel="stylesheet" href="../../css/default.css">
 </head>
+
 <body>
+    <div id="webgl-output">
+        <script type="text/javascript">
+            (function () {
+                // your page initialization code here
+                // the DOM will be available here
+                init()
+            })();
+        </script>
+</body>
 
-<div id="Stats-output">
-</div>
-<!-- Div which will hold the Output -->
-<div id="WebGL-output">
-</div>
-
+</html>
 <!-- Javascript code that runs our Three.js examples -->
 <script type="text/javascript">
-
     // once everything is loaded, we run our Three.js stuff.
     function init() {
 
@@ -103,7 +103,8 @@
             canvas.height = 16;
 
             var context = canvas.getContext('2d');
-            var gradient = context.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, canvas.width / 2);
+            var gradient = context.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2,
+                canvas.height / 2, canvas.width / 2);
             gradient.addColorStop(0, 'rgba(255,255,255,1)');
             gradient.addColorStop(0.2, 'rgba(0,255,255,1)');
             gradient.addColorStop(0.4, 'rgba(0,0,64,1)');
@@ -124,15 +125,15 @@
             if (group) {
                 // group.rotation.y+=0.006;
                 group.rotation.y += 0.006;
-//                if (group.geometry) {
-//                    group.geometry.vertices.forEach(function(v) {
-////                        var scale = 1.001 + Math.random()/100;
-//                        var sMatrix = new THREE.Matrix3(1.001 + Math.random()/100,0,0,
-//                                0,1.001 + Math.random()/100,0,
-//                                0,0,1.001 + Math.random()/100);
-//                        v.applyMatrix3(sMatrix);
-//                    })
-//                }
+                //                if (group.geometry) {
+                //                    group.geometry.vertices.forEach(function(v) {
+                ////                        var scale = 1.001 + Math.random()/100;
+                //                        var sMatrix = new THREE.Matrix3(1.001 + Math.random()/100,0,0,
+                //                                0,1.001 + Math.random()/100,0,
+                //                                0,0,1.001 + Math.random()/100);
+                //                        v.applyMatrix3(sMatrix);
+                //                    })
+                //                }
             }
 
 
@@ -159,4 +160,5 @@
     window.onload = init;
 </script>
 </body>
+
 </html>
