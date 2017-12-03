@@ -60,16 +60,6 @@ function init() {
       group.add(mesh);
     }
 
-    // for (var j = 0; j < geometryBonds.vertices.length; j += 2) {
-    //   var path = new THREE.SplineCurve3([geometryBonds.vertices[j], geometryBonds.vertices[j + 1]]);
-    //   var tube = new THREE.TubeGeometry(path, 1, 0.04);
-    //   var material = new THREE.MeshPhongMaterial({
-    //     color: 0xcccccc
-    //   });
-    //   var mesh = new THREE.Mesh(tube, material);
-    //   group.add(mesh);
-    // }
-
     loaderScene.render(group, camera);
   });
 }
