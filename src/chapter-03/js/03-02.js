@@ -4,25 +4,45 @@ function init() {
   var stats = initStats();
   var renderer = initRenderer();
   var camera = initCamera();
-  var trackballControls = initTrackballControls(camera, renderer);
-  var clock = new THREE.Clock();
 
   // create a scene, that will hold all our elements such as objects, cameras and lights.
   var scene = new THREE.Scene();
 
-  // add a simple scene
-  addHouseAndTree(scene)
+  var cubeAndSphere = addDefaultCubeAndSphere(scene);
+  var cube = cubeAndSphere.cube;
+  var sphere = cubeAndSphere.sphere;
+  var plane = addGroundPlane(scene);
+  
 
   // add subtle ambient lighting
-  var ambientLight = new THREE.AmbientLight("#0c0c0c");
+  var ambiColor = "#1c1c1c";
+  var ambientLight = new THREE.AmbientLight(ambiColor);
   scene.add(ambientLight);
 
-  // the point light where working with
-  var pointColor = "#ccffcc";
-  var pointLight = new THREE.PointLight(pointColor);
-  pointLight.distance = 100;
-  scene.add(pointLight);
+  // add spotlight for a bit of light
+  var spotLight0 = new THREE.SpotLight(0xcccccc);
+  spotLight0.position.set(-40, 30, -10);
+  spotLight0.lookAt(plane);
+  scene.add(spotLight0);
 
+  // add target and light
+  var target = new THREE.Object3D();
+  target.position = new THREE.Vector3(5, 0, 0);
+
+  var spotLight = new THREE.SpotLight("#ffffff");
+  spotLight.position.set(-40, 60, -10);
+  spotLight.castShadow = true;
+  spotLight.shadow.camera.near = 1;
+  spotLight.shadow.camera.far = 100;
+  spotLight.target = plane;
+  spotLight.distance = 0;
+  spotLight.angle = 0.4;
+  spotLight.shadow.camera.fov = 120;
+  scene.add(spotLight);
+  var debugCamera = new THREE.CameraHelper(spotLight.shadow.camera);
+
+  var pp = new THREE.SpotLightHelper(spotLight)
+  scene.add(pp)
 
   // add a small sphere simulating the pointlight
   var sphereLight = new THREE.SphereGeometry(0.2);
@@ -30,13 +50,13 @@ function init() {
     color: 0xac6c25
   });
   var sphereLightMesh = new THREE.Mesh(sphereLight, sphereLightMaterial);
-  sphereLightMesh.position = new THREE.Vector3(3, 0, 5);
+  sphereLightMesh.castShadow = true;
+
+  sphereLightMesh.position = new THREE.Vector3(3, 20, 3);
   scene.add(sphereLightMesh);
 
-  // call the render function
+  // for controlling the rendering
   var step = 0;
-
-  // used to determine the switch point for the light animation
   var invert = 1;
   var phase = 0;
 
@@ -45,26 +65,37 @@ function init() {
 
   function render() {
     stats.update();
-    trackballControls.update(clock.getDelta());
+    // rotate the cube around its axes
+    cube.rotation.x += controls.rotationSpeed;
+    cube.rotation.y += controls.rotationSpeed;
+    cube.rotation.z += controls.rotationSpeed;
+
+    // bounce the sphere up and down
+    step += controls.bouncingSpeed;
+    sphere.position.x = 20 + (10 * (Math.cos(step)));
+    sphere.position.y = 2 + (10 * Math.abs(Math.sin(step)));
 
     // move the light simulation
-    if (phase > 2 * Math.PI) {
-      invert = invert * -1;
-      phase -= 2 * Math.PI;
-    } else {
-      phase += controls.rotationSpeed;
+    if (!controls.stopMovingLight) {
+      if (phase > 2 * Math.PI) {
+        invert = invert * -1;
+        phase -= 2 * Math.PI;
+      } else {
+        phase += controls.rotationSpeed;
+      }
+      sphereLightMesh.position.z = +(7 * (Math.sin(phase)));
+      sphereLightMesh.position.x = +(14 * (Math.cos(phase)));
+      sphereLightMesh.position.y = 15;
+
+      if (invert < 0) {
+        var pivot = 14;
+        sphereLightMesh.position.x = (invert * (sphereLightMesh.position.x - pivot)) + pivot;
+      }
+
+      spotLight.position.copy(sphereLightMesh.position);
     }
-    sphereLightMesh.position.z = +(7 * (Math.sin(phase)));
-    sphereLightMesh.position.x = +(14 * (Math.cos(phase)));
-    sphereLightMesh.position.y = 10;
 
-    if (invert < 0) {
-      var pivot = 14;
-      sphereLightMesh.position.x = (invert * (sphereLightMesh.position.x - pivot)) + pivot;
-    }
-
-    pointLight.position.copy(sphereLightMesh.position);
-
+    pp.update();
     // render using requestAnimationFrame
     requestAnimationFrame(render);
     renderer.render(scene, camera);
@@ -74,10 +105,16 @@ function init() {
     var controls = new function () {
       this.rotationSpeed = 0.03;
       this.bouncingSpeed = 0.03;
-      this.ambientColor = ambientLight.color.getStyle();;
-      this.pointColor = pointLight.color.getStyle();;
+      this.ambientColor = ambiColor;
+      this.pointColor = spotLight.color.getStyle();
       this.intensity = 1;
-      this.distance = 100;
+      this.distance = 0;
+      this.angle = 0.1;
+      this.shadowDebug = false;
+      this.castShadow = true;
+      this.target = "Plane";
+      this.stopMovingLight = false;
+      this.penumbra = 0;
     };
 
     var gui = new dat.GUI();
@@ -86,17 +123,57 @@ function init() {
     });
 
     gui.addColor(controls, 'pointColor').onChange(function (e) {
-      pointLight.color = new THREE.Color(e);
+      spotLight.color = new THREE.Color(e);
     });
 
-    gui.add(controls, 'intensity', 0, 3).onChange(function (e) {
-      pointLight.intensity = e;
+    gui.add(controls, 'angle', 0, Math.PI * 2).onChange(function (e) {
+      spotLight.angle = e;
     });
 
-    gui.add(controls, 'distance', 0, 100).onChange(function (e) {
-      pointLight.distance = e;
+    gui.add(controls, 'intensity', 0, 5).onChange(function (e) {
+      spotLight.intensity = e;
+    });
+
+    gui.add(controls, 'penumbra', 0, 1).onChange(function (e) {
+      spotLight.penumbra = e;
+    });
+
+    gui.add(controls, 'distance', 0, 200).onChange(function (e) {
+      spotLight.distance = e;
+    });
+
+    gui.add(controls, 'shadowDebug').onChange(function (e) {
+      if (e) {
+        scene.add(debugCamera);
+      } else {
+        scene.remove(debugCamera);
+      }
+    });
+
+    gui.add(controls, 'castShadow').onChange(function (e) {
+      spotLight.castShadow = e;
+    });
+
+    gui.add(controls, 'target', ['Plane', 'Sphere', 'Cube']).onChange(function (e) {
+      switch (e) {
+        case "Plane":
+          spotLight.target = plane;
+          break;
+        case "Sphere":
+          spotLight.target = sphere;
+          break;
+        case "Cube":
+          spotLight.target = cube;
+          break;
+      }
+
+    });
+
+    gui.add(controls, 'stopMovingLight').onChange(function (e) {
+      stopMovingLight = e;
     });
 
     return controls;
   }
+
 }

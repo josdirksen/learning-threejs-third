@@ -102,9 +102,14 @@ function init() {
     gui.add(controls, 'outputObjects');
     gui.add(controls, 'numberOfObjects').listen();
 
+    var trackballControls = initTrackballControls(camera, renderer);
+    var clock = new THREE.Clock();
+
     render();
 
     function render() {
+
+        trackballControls.update(clock.getDelta());
         stats.update();
 
         // rotate the cubes around its axes

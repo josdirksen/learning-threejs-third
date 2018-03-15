@@ -87,10 +87,18 @@ function init() {
     gui.add(controls, 'rotationSpeed', 0, 0.5);
     gui.add(controls, 'bouncingSpeed', 0, 0.5);
 
+
+    // attach them here, since appendChild needs to be called first
+    var trackballControls = initTrackballControls(camera, renderer);
+    var clock = new THREE.Clock();
+
     render();
 
     function render() {
+        // update the stats and the controls
+        trackballControls.update(clock.getDelta());
         stats.update();
+        
         // rotate the cube around its axes
         cube.rotation.x += controls.rotationSpeed;
         cube.rotation.y += controls.rotationSpeed;

@@ -7,7 +7,6 @@ function init() {
 
     // create a camera, which defines where we're looking at.
     var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-    scene.add(camera);
 
     // create a render and set the size
     var renderer = new THREE.WebGLRenderer();
@@ -103,15 +102,20 @@ function init() {
     gui.add(controls, 'outputObjects');
     gui.add(controls, 'numberOfObjects').listen();
 
-    render();
+    // attach them here, since appendChild needs to be called first
+    var trackballControls = initTrackballControls(camera, renderer);
+    var clock = new THREE.Clock();
 
+    render();
+    
     function render() {
+
+        trackballControls.update(clock.getDelta());
         stats.update();
 
         // rotate the cubes around its axes
         scene.traverse(function (e) {
             if (e instanceof THREE.Mesh && e != plane) {
-
                 e.rotation.x += controls.rotationSpeed;
                 e.rotation.y += controls.rotationSpeed;
                 e.rotation.z += controls.rotationSpeed;

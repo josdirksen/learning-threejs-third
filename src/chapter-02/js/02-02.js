@@ -49,7 +49,6 @@ function init() {
     spotLight.position.set(-40, 60, -10);
     spotLight.castShadow = true;
     scene.add(spotLight);
-    scene.add(spotLight);
 
     // add the output of the renderer to the html element
     document.getElementById("webgl-output").appendChild(renderer.domElement);
@@ -102,9 +101,14 @@ function init() {
     gui.add(controls, 'outputObjects');
     gui.add(controls, 'numberOfObjects').listen();
 
+    var trackballControls = initTrackballControls(camera, renderer);
+    var clock = new THREE.Clock();
+
     render();
 
     function render() {
+
+        trackballControls.update(clock.getDelta());
         stats.update();
 
         // rotate the cubes around its axes

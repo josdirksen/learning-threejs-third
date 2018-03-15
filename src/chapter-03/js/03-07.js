@@ -12,6 +12,10 @@ function init() {
   camera.position.z = 45;
   camera.lookAt(new THREE.Vector3(10, 0, 0));
 
+  var trackballControls = initTrackballControls(camera, renderer);
+  var clock = new THREE.Clock();
+
+
   // create a scene, that will hold all our elements such as objects, cameras and lights.
   var scene = new THREE.Scene();
 
@@ -162,6 +166,7 @@ function init() {
 
   function render() {
     stats.update();
+    trackballControls.update(clock.getDelta());
     // rotate the cube around its axes
     cube.rotation.x += controls.rotationSpeed;
     cube.rotation.y += controls.rotationSpeed;

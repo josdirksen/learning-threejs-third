@@ -9,12 +9,12 @@ function init() {
   var renderer = new THREE.WebGLRenderer();
   renderer.setClearColor(new THREE.Color(0x000000));
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.shadowMap.enabled = true;
+  // renderer.shadowMap.enabled = true;
 
-  createTree(scene);
-  createHouse(scene);
-  createGroundPlane(scene);
-  createBoundingWall(scene);
+  // createTree(scene);
+  // createHouse(scene);
+  // createGroundPlane(scene);
+  // createBoundingWall(scene);
 
   // create a cube
   var cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
@@ -30,7 +30,6 @@ function init() {
   cube.position.z = 0;
 
   // add the cube to the scene
-  // scene.add(cube);
 
   var sphereGeometry = new THREE.SphereGeometry(4, 20, 20);
   var sphereMaterial = new THREE.MeshLambertMaterial({
@@ -44,8 +43,22 @@ function init() {
   sphere.position.z = 2;
   sphere.castShadow = true;
 
-  // add the sphere to the scene
-  // scene.add(sphere);
+  // create the ground plane
+  var planeGeometry = new THREE.PlaneGeometry(60, 20);
+  var planeMaterial = new THREE.MeshLambertMaterial({
+    color: 0xAAAAAA
+  });
+  var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+
+  // rotate and position the plane
+  plane.rotation.x = -0.5 * Math.PI;
+  plane.position.set(15, 0, 0);
+  plane.receiveShadow = true;
+
+  // add the objects
+  scene.add(cube);
+  scene.add(sphere);
+  scene.add(plane);
 
   // position and point the camera to the center of the scene
   camera.position.x = -30;

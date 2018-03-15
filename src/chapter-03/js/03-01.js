@@ -9,7 +9,7 @@ function init() {
   var scene = new THREE.Scene();
 
   // add ambient lighting
-  var ambientLight = new THREE.AmbientLight("#0c0c0c");
+  var ambientLight = new THREE.AmbientLight("#606008", 1);
   scene.add(ambientLight);
 
   // add spotlight for the shadows
@@ -23,7 +23,7 @@ function init() {
   addHouseAndTree(scene)
 
   // add controls
-  var controls = setupControls()
+  var controls = setupControls();
 
   // call the render function
   render();
@@ -36,15 +36,19 @@ function init() {
 
   function setupControls() {
     var controls = new function () {
-      this.rotationSpeed = 0.02;
-      this.bouncingSpeed = 0.03;
+      this.intensity = ambientLight.intensity;
       this.ambientColor = ambientLight.color.getStyle();
       this.disableSpotlight = false;
     };
 
     var gui = new dat.GUI();
+    gui.add(controls, 'intensity', 0, 3, 0.1).onChange(function (e) {
+      ambientLight.color = new THREE.Color(controls.ambientColor);
+      ambientLight.intensity = controls.intensity;
+    });
     gui.addColor(controls, 'ambientColor').onChange(function (e) {
-      ambientLight.color = new THREE.Color(e);
+      ambientLight.color = new THREE.Color(controls.ambientColor);
+      ambientLight.intensity = controls.intensity;
     });
     gui.add(controls, 'disableSpotlight').onChange(function (e) {
       spotLight.visible = !e;

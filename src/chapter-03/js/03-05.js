@@ -4,11 +4,14 @@ function init() {
   var renderer = initRenderer();
   var camera = initCamera();
 
+  var trackballControls = initTrackballControls(camera, renderer);
+  var clock = new THREE.Clock();
+
   // create a scene, that will hold all our elements such as objects, cameras and lights.
   var scene = new THREE.Scene();
 
   // create the ground plane
-  var textureGrass = new THREE.TextureLoader().load("../../assets/textures/grasslight-big.jpg");
+  var textureGrass = new THREE.TextureLoader().load("../../assets/textures/ground/grasslight-big.jpg");
   textureGrass.wrapS = THREE.RepeatWrapping;
   textureGrass.wrapT = THREE.RepeatWrapping;
   textureGrass.repeat.set(10, 10);
@@ -48,7 +51,7 @@ function init() {
   scene.add(cube);
 
   var sphereGeometry = new THREE.SphereGeometry(4, 25, 25);
-  var sphereMaterial = new THREE.MeshLambertMaterial({
+  var sphereMaterial = new THREE.MeshPhongMaterial({
     color: 0x7777ff
   });
   var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
@@ -104,6 +107,9 @@ function init() {
 
   function render() {
     stats.update();
+
+    trackballControls.update(clock.getDelta());
+
     // rotate the cube around its axes
     cube.rotation.x += controls.rotationSpeed;
     cube.rotation.y += controls.rotationSpeed;
@@ -123,8 +129,8 @@ function init() {
       this.rotationSpeed = 0.03;
       this.bouncingSpeed = 0.03;
       this.hemisphere = true;
-      this.color = 0x00ff00;
-      this.skyColor = 0x0000ff;
+      this.color = 0x0000ff;
+      this.groundColor = 0x00ff00;
       this.intensity = 0.6;
 
     };
@@ -139,10 +145,10 @@ function init() {
         hemiLight.intensity = controls.intensity;
       }
     });
-    gui.addColor(controls, 'color').onChange(function (e) {
+    gui.addColor(controls, 'groundColor').onChange(function (e) {
       hemiLight.groundColor = new THREE.Color(e);
     });
-    gui.addColor(controls, 'skyColor').onChange(function (e) {
+    gui.addColor(controls, 'color').onChange(function (e) {
       hemiLight.color = new THREE.Color(e);
     });
     gui.add(controls, 'intensity', 0, 5).onChange(function (e) {

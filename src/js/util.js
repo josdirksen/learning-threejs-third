@@ -134,8 +134,8 @@ function addDefaultCubeAndSphere(scene) {
  */
 function addGroundPlane(scene) {
     // create the ground plane
-    var planeGeometry = new THREE.PlaneGeometry(60, 20, 1, 1);
-    var planeMaterial = new THREE.MeshLambertMaterial({
+    var planeGeometry = new THREE.PlaneGeometry(60, 20, 120, 120);
+    var planeMaterial = new THREE.MeshPhongMaterial({
         color: 0xffffff
     });
     var plane = new THREE.Mesh(planeGeometry, planeMaterial);
@@ -165,7 +165,7 @@ function addHouseAndTree(scene) {
         var wallTop = new THREE.CubeGeometry(2, 2, 50);
         var wallBottom = new THREE.CubeGeometry(2, 2, 50);
 
-        var wallMaterial = new THREE.MeshLambertMaterial({
+        var wallMaterial = new THREE.MeshPhongMaterial({
             color: 0xa0522d
         });
 
@@ -189,7 +189,7 @@ function addHouseAndTree(scene) {
     function createGroundPlane(scene) {
         // create the ground plane
         var planeGeometry = new THREE.PlaneGeometry(70, 50);
-        var planeMaterial = new THREE.MeshLambertMaterial({
+        var planeMaterial = new THREE.MeshPhongMaterial({
             color: 0x9acd32
         });
         var plane = new THREE.Mesh(planeGeometry, planeMaterial);
@@ -209,10 +209,10 @@ function addHouseAndTree(scene) {
         var base = new THREE.CylinderGeometry(5, 5, 6);
 
         // create the mesh
-        var roofMesh = new THREE.Mesh(roof, new THREE.MeshLambertMaterial({
+        var roofMesh = new THREE.Mesh(roof, new THREE.MeshPhongMaterial({
             color: 0x8b7213
         }));
-        var baseMesh = new THREE.Mesh(base, new THREE.MeshLambertMaterial({
+        var baseMesh = new THREE.Mesh(base, new THREE.MeshPhongMaterial({
             color: 0xffe4c4
         }));
 
@@ -237,10 +237,10 @@ function addHouseAndTree(scene) {
         var leaves = new THREE.SphereGeometry(4);
 
         // create the mesh
-        var trunkMesh = new THREE.Mesh(trunk, new THREE.MeshLambertMaterial({
+        var trunkMesh = new THREE.Mesh(trunk, new THREE.MeshPhongMaterial({
             color: 0x8b4513
         }));
-        var leavesMesh = new THREE.Mesh(leaves, new THREE.MeshLambertMaterial({
+        var leavesMesh = new THREE.Mesh(leaves, new THREE.MeshPhongMaterial({
             color: 0x00ff00
         }));
 

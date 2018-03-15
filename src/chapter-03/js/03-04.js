@@ -5,6 +5,8 @@ function init() {
   var renderer = initRenderer();
   var camera = initCamera();
   camera.position.set(-80, 80, 80);
+  var trackballControls = initTrackballControls(camera, renderer);
+  var clock = new THREE.Clock();
 
 
   // create a scene, that will hold all our elements such as objects, cameras and lights.
@@ -77,7 +79,6 @@ function init() {
   directionalLight.shadow.camera.top = 30;
   directionalLight.shadow.camera.bottom = -30;
 
-  directionalLight.distance = 0;
   directionalLight.intensity = 0.5;
   directionalLight.shadow.mapSize.width = 1024;
   directionalLight.shadow.mapSize.height = 1024;
@@ -106,9 +107,6 @@ function init() {
     this.ambientColor = ambiColor;
     this.pointColor = pointColor;
     this.intensity = 0.5;
-    this.distance = 0;
-    this.exponent = 30;
-    this.angle = 0.1;
     this.debug = false;
     this.castShadow = true;
     this.onlyShadow = false;
@@ -128,10 +126,6 @@ function init() {
 
   gui.add(controls, 'intensity', 0, 5).onChange(function (e) {
     directionalLight.intensity = e;
-  });
-
-  gui.add(controls, 'distance', 0, 200).onChange(function (e) {
-    directionalLight.distance = e;
   });
 
   gui.add(controls, 'debug').onChange(function (e) {
@@ -167,6 +161,8 @@ function init() {
 
   function render() {
     stats.update();
+    trackballControls.update(clock.getDelta());
+
     // rotate the cube around its axes
     cube.rotation.x += controls.rotationSpeed;
     cube.rotation.y += controls.rotationSpeed;

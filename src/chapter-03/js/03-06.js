@@ -5,8 +5,12 @@ function init() {
     antialias: true
   });
   var camera = initCamera();
-  camera.position.set(-20, 30, 20)
-  camera.lookAt(new THREE.Vector3(0, 0, -35));
+  
+  camera.position.set(-50, 30, 50)
+  // camera.lookAt(new THREE.Vector3(0, 0, -35));
+
+  var trackballControls = initTrackballControls(camera, renderer);
+  var clock = new THREE.Clock();
 
   // create a scene, that will hold all our elements such as objects, cameras and lights.
   var scene = new THREE.Scene();
@@ -42,9 +46,6 @@ function init() {
   var areaLight1 = new THREE.RectAreaLight(0xff0000, 500, 4, 10);
   areaLight1.position.set(-10, 10, -35);
   scene.add(areaLight1);
-
-  rectLightHelper = new THREE.RectAreaLightHelper(areaLight1);
-  scene.add(rectLightHelper);
 
   var areaLight2 = new THREE.RectAreaLight(0x00ff00, 500, 4, 10);
   areaLight2.position.set(0, 10, -35);
@@ -132,6 +133,7 @@ function init() {
 
   function render() {
     stats.update();
+    trackballControls.update(clock.getDelta());
 
     // render using requestAnimationFrame
     requestAnimationFrame(render);

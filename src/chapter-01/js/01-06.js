@@ -10,11 +10,14 @@ function init() {
     // initialize stats
     var stats = initStats();
 
+
     // create a scene, that will hold all our elements such as objects, cameras and lights.
     scene = new THREE.Scene();
 
     // create a camera, which defines where we're looking at.
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+    
 
     // create a render and set the size
     renderer = new THREE.WebGLRenderer();
@@ -23,6 +26,11 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
 
+    // initialize the trackball controls and the clock which is needed
+    var trackballControls = initTrackballControls(camera, renderer);
+    var clock = new THREE.Clock();
+
+        
     // create the ground plane
     var planeGeometry = new THREE.PlaneGeometry(60, 20, 1, 1);
     var planeMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
@@ -99,7 +107,11 @@ function init() {
     render();
 
     function render() {
+
+        // update the stats and the controls
+        trackballControls.update(clock.getDelta());
         stats.update();
+
         // rotate the cube around its axes
         cube.rotation.x += controls.rotationSpeed;
         cube.rotation.y += controls.rotationSpeed;
