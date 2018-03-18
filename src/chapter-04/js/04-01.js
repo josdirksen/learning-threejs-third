@@ -6,13 +6,12 @@ function init() {
 
   // create a scene, that will hold all our elements such as objects, cameras and lights.
   var scene = new THREE.Scene();
-
   // create a render and set the size
   var webGLRenderer = new THREE.WebGLRenderer();
-  webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+  webGLRenderer.setClearColor(new THREE.Color(0x000000));
   webGLRenderer.setSize(window.innerWidth, window.innerHeight);
   webGLRenderer.shadowMapEnabled = true;
-
+  
   var canvasRenderer = new THREE.CanvasRenderer();
   canvasRenderer.setSize(window.innerWidth, window.innerHeight);
   renderer = webGLRenderer;
@@ -31,7 +30,9 @@ function init() {
 
 
   var meshMaterial = new THREE.MeshBasicMaterial({
-    color: 0x7777ff
+    color: 0x7777ff,
+    name: 'Basic Material',
+    flatShading: true
   });
 
   var sphere = new THREE.Mesh(sphereGeometry, meshMaterial);
@@ -78,17 +79,7 @@ function init() {
     this.rotationSpeed = 0.02;
     this.bouncingSpeed = 0.03;
 
-    this.opacity = meshMaterial.opacity;
-    this.transparent = meshMaterial.transparent;
-    this.overdraw = meshMaterial.overdraw;
-    this.visible = meshMaterial.visible;
-    this.side = "front";
-
     this.color = meshMaterial.color.getStyle();
-    this.wireframe = meshMaterial.wireframe;
-    this.wireframeLinewidth = meshMaterial.wireframeLinewidth;
-    this.wireFrameLineJoin = meshMaterial.wireframeLinejoin;
-
     this.selectedMesh = "cube";
 
     this.switchRenderer = function () {
@@ -105,81 +96,64 @@ function init() {
   };
 
   var gui = new dat.GUI();
+  var selectedMesh = cube;
+  
+  addBasicMaterialSettings(gui, controls, meshMaterial);
 
-
-  var spGui = gui.addFolder("Mesh");
-  spGui.add(controls, 'opacity', 0, 1).onChange(function (e) {
-    meshMaterial.opacity = e
-  });
-  spGui.add(controls, 'transparent').onChange(function (e) {
-    meshMaterial.transparent = e
-  });
-  spGui.add(controls, 'wireframe').onChange(function (e) {
-    meshMaterial.wireframe = e
-  });
-  spGui.add(controls, 'wireframeLinewidth', 0, 20).onChange(function (e) {
-    meshMaterial.wireframeLinewidth = e
-  });
-  spGui.add(controls, 'visible').onChange(function (e) {
-    meshMaterial.visible = e
-  });
-  spGui.add(controls, 'side', ["front", "back", "double"]).onChange(function (e) {
-
-    switch (e) {
-      case "front":
-        meshMaterial.side = THREE.FrontSide;
-        break;
-      case "back":
-        meshMaterial.side = THREE.BackSide;
-        break;
-      case "double":
-        meshMaterial.side = THREE.DoubleSide;
-        break;
-    }
-    meshMaterial.needsUpdate = true;
-  });
+  var spGui = gui.addFolder("THREE.MeshBasicMaterial");
   spGui.addColor(controls, 'color').onChange(function (e) {
     meshMaterial.color.setStyle(e)
   });
-  spGui.add(controls, 'selectedMesh', ["cube", "sphere", "plane"]).onChange(function (e) {
-
-    scene.remove(plane);
-    scene.remove(cube);
-    scene.remove(sphere);
-
-    switch (e) {
-      case "cube":
-        scene.add(cube);
-        break;
-      case "sphere":
-        scene.add(sphere);
-        break;
-      case "plane":
-        scene.add(plane);
-        break;
-
-    }
-
-  });
-
-  gui.add(controls, 'switchRenderer');
-  var cvGui = gui.addFolder("Canvas renderer");
-  cvGui.add(controls, 'overdraw').onChange(function (e) {
-    meshMaterial.overdraw = e
-  });
-  cvGui.add(controls, 'wireFrameLineJoin', ['round', 'bevel', 'miter']).onChange(function (e) {
+  spGui.add(meshMaterial, 'wireframe');
+  spGui.add(meshMaterial, 'wireframeLinewidth', 0, 20);
+  spGui.add(meshMaterial, 'wireframeLinejoin', ['round', 'bevel', 'miter']).onChange(function (e) {
     meshMaterial.wireframeLinejoin = e
   });
+  spGui.add(meshMaterial, 'wireframeLinecap', ['butt', 'round', 'square']).onChange(function (e) {
+    meshMaterial.wireframeLinecap = e
+  });
 
+  loadGopher(meshMaterial).then(function(gopher) {
+    gopher.scale.x = 4;
+    gopher.scale.y = 4;
+    gopher.scale.z = 4;
+    gui.add(controls, 'selectedMesh', ["cube", "sphere", "plane", "gopher"]).onChange(function (e) {
+
+      scene.remove(plane);
+      scene.remove(cube);
+      scene.remove(sphere);
+      scene.remove(gopher);
+  
+      switch (e) {
+        case "cube":
+          scene.add(cube);
+          selectedMesh = cube;
+          break;
+        case "sphere":
+          scene.add(sphere);
+          selectedMesh = sphere;
+          break;
+        case "plane":
+          scene.add(plane);
+          selectedMesh = plane;
+          break;
+        case "gopher":
+          scene.add(gopher);
+          selectedMesh = gopher;
+          break;
+      }
+    });
+  });
+
+
+  gui.add(controls, 'switchRenderer');
 
   render();
 
   function render() {
     stats.update();
 
-    cube.rotation.y = step += 0.01;
-    plane.rotation.y = step;
-    sphere.rotation.y = step;
+    selectedMesh.rotation.y = step += 0.01;
 
     // render using requestAnimationFrame
     requestAnimationFrame(render);

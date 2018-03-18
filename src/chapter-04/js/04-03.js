@@ -25,7 +25,7 @@ function init() {
     this.removeCube = function () {
       var allChildren = scene.children;
       var lastObject = allChildren[allChildren.length - 1];
-      if (lastObject instanceof THREE.Mesh) {
+      if (lastObject instanceof THREE.Group) {
         scene.remove(lastObject);
         this.numberOfObjects = scene.children.length;
       }
@@ -91,8 +91,7 @@ function init() {
 
     // rotate the cubes around its axes
     scene.traverse(function (e) {
-      if (e instanceof THREE.Mesh) {
-
+      if (e instanceof THREE.Group) {
         e.rotation.x += controls.rotationSpeed;
         e.rotation.y += controls.rotationSpeed;
         e.rotation.z += controls.rotationSpeed;

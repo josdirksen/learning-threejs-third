@@ -311,3 +311,68 @@ function createGhostTexture() {
     texture.needsUpdate = true;
     return texture;
 };
+
+/**
+ * Add a folder to the gui containing the basic material properties.
+ * 
+ * @param gui the gui to add to
+ * @param controls the current controls object
+ * @param material the material to control
+ * @param geometry the geometry we're working with
+ */
+function addBasicMaterialSettings(gui, controls, material) {
+
+    controls.material = material;
+
+    var folder = gui.addFolder('THREE.Material');
+    folder.add(controls.material, 'id');
+    folder.add(controls.material, 'uuid');
+    folder.add(controls.material, 'name');
+    folder.add(controls.material, 'opacity', 0, 1, 0.01);
+    folder.add(controls.material, 'transparent');
+    folder.add(controls.material, 'overdraw', 0, 1, 0.01);
+    folder.add(controls.material, 'visible');
+    folder.add(controls.material, 'side', {FrontSide: 0, BackSide: 1, BothSides: 2}).onChange(function (side) {
+        controls.material.side = parseInt(side)
+    });
+
+    folder.add(controls.material, 'colorWrite');
+    folder.add(controls.material, 'flatShading').onChange(function(shading) {
+        controls.material.flatShading = shading;
+        controls.material.needsUpdate = true;
+    });
+    folder.add(controls.material, 'premultipliedAlpha');
+    folder.add(controls.material, 'dithering');
+    folder.add(controls.material, 'shadowSide', {FrontSide: 0, BackSide: 1, BothSides: 2});
+    folder.add(controls.material, 'vertexColors', {NoColors: THREE.NoColors, FaceColors: THREE.FaceColors, VertexColors: THREE.VertexColors}).onChange(function (vertexColors) {
+        material.vertexColors = parseInt(vertexColors);
+    });
+    folder.add(controls.material, 'fog');
+}
+
+function loadGopher(material) {
+    var loader = new THREE.OBJLoader();
+    var mesh = null;
+    var p = new Promise(function(resolve) {
+        loader.load('../../assets/models/gopher/gopher.obj', function (loadedMesh) {
+            // this is a group of meshes, so iterate until we reach a THREE.Mesh
+            mesh = loadedMesh;
+            console.log(mesh);
+            if (material) {
+                // material is defined, so overwrite the default material.
+                setMaterialGroup(material, mesh);
+            }
+            resolve(mesh);
+        });
+    });
+
+    return p;
+}
+
+function setMaterialGroup(material, group) {
+    if (group instanceof THREE.Mesh) {
+        group.material = material;        
+    } else if (group instanceof THREE.Group) {
+        group.children.forEach(function(child) {setMaterialGroup(material, child)});
+    }
+}

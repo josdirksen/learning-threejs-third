@@ -40,6 +40,8 @@ function init() {
   var cube = new THREE.Mesh(cubeGeometry, meshMaterial);
   var plane = new THREE.Mesh(planeGeometry, meshMaterial);
 
+  var selectedMesh = cube;
+
   // position the sphere
   sphere.position.x = 0;
   sphere.position.y = 3;
@@ -60,7 +62,7 @@ function init() {
       0x3333FF,
       0.5,
       0.5);
-    sphere.add(arrow);
+    // sphere.add(arrow);
   }
 
 
@@ -93,136 +95,43 @@ function init() {
   var controls = new function () {
     this.rotationSpeed = 0.02;
     this.bouncingSpeed = 0.03;
-
-    this.opacity = meshMaterial.opacity;
-    this.transparent = meshMaterial.transparent;
-
-    this.visible = meshMaterial.visible;
-    this.side = "front";
-
-    this.wireframe = meshMaterial.wireframe;
-    this.wireframeLinewidth = meshMaterial.wireframeLinewidth;
-
     this.selectedMesh = "cube";
-
-    this.shadow = "flat";
-
-    this.switchRenderer = function () {
-      if (renderer instanceof THREE.WebGLRenderer) {
-        renderer = canvasRenderer;
-        document.getElementById("webgl-output").innerHTML = "";
-        document.getElementById("webgl-output").appendChild(renderer.domElement);
-      } else {
-        renderer = webGLRenderer;
-        document.getElementById("webgl-output").innerHTML = "";
-        document.getElementById("webgl-output").appendChild(renderer.domElement);
-      }
-    }
-
   };
 
-  var gui = new dat.GUI();
+  var gui = new dat.GUI();    
+  addBasicMaterialSettings(gui, controls, meshMaterial);
 
+  loadGopher(meshMaterial).then(function(gopher) {
+    gopher.scale.x = 4;
+    gopher.scale.y = 4;
+    gopher.scale.z = 4;
+    gui.add(controls, 'selectedMesh', ["cube", "sphere", "plane", "gopher"]).onChange(function (e) {
 
-  var spGui = gui.addFolder("Mesh");
-  spGui.add(controls, 'opacity', 0, 1).onChange(function (e) {
-    meshMaterial.opacity = e
+      scene.remove(plane);
+      scene.remove(cube);
+      scene.remove(sphere);
+      scene.remove(gopher);
+  
+      switch (e) {
+        case "cube":
+          scene.add(cube);
+          selectedMesh = cube;
+          break;
+        case "sphere":
+          scene.add(sphere);
+          selectedMesh = sphere;
+          break;
+        case "plane":
+          scene.add(plane);
+          selectedMesh = plane;
+          break;
+        case "gopher":
+          scene.add(gopher);
+          selectedMesh = gopher;
+          break;
+      }
+    });
   });
-  spGui.add(controls, 'transparent').onChange(function (e) {
-    meshMaterial.transparent = e
-  });
-  spGui.add(controls, 'wireframe').onChange(function (e) {
-    meshMaterial.wireframe = e
-  });
-  spGui.add(controls, 'wireframeLinewidth', 0, 20).onChange(function (e) {
-    meshMaterial.wireframeLinewidth = e
-  });
-  spGui.add(controls, 'visible').onChange(function (e) {
-    meshMaterial.visible = e
-  });
-  spGui.add(controls, 'side', ["front", "back", "double"]).onChange(function (e) {
-    console.log(e);
-    switch (e) {
-      case "front":
-        meshMaterial.side = THREE.FrontSide;
-        break;
-      case "back":
-        meshMaterial.side = THREE.BackSide;
-        break;
-      case "double":
-        meshMaterial.side = THREE.DoubleSide;
-        break;
-    }
-    meshMaterial.needsUpdate = true;
-
-  });
-  spGui.add(controls, 'shadow', ["flat", "smooth"]).onChange(function (e) {
-    switch (e) {
-      case "flat":
-        // https://github.com/mrdoob/three.js/issues/1929
-        meshMaterial.shading = THREE.FlatShading;
-        break;
-      case "smooth":
-        meshMaterial.shading = THREE.SmoothShading;
-        break;
-    }
-
-    var oldPos = sphere.position.clone();
-    scene.remove(sphere);
-    scene.remove(plane);
-    scene.remove(cube);
-    sphere = new THREE.Mesh(sphere.geometry.clone(), meshMaterial);
-    cube = new THREE.Mesh(cube.geometry.clone(), meshMaterial);
-    plane = new THREE.Mesh(plane.geometry.clone(), meshMaterial);
-
-    sphere.position = oldPos;
-    cube.position = oldPos;
-    plane.position = oldPos;
-
-    switch (controls.selectedMesh) {
-      case "cube":
-        scene.add(cube);
-
-        break;
-      case "sphere":
-        scene.add(sphere);
-
-        break;
-      case "plane":
-        scene.add(plane);
-        break;
-
-    }
-
-    meshMaterial.needsUpdate = true;
-    console.log(meshMaterial);
-  });
-
-  spGui.add(controls, 'selectedMesh', ["cube", "sphere", "plane"]).onChange(function (e) {
-
-    scene.remove(plane);
-    scene.remove(cube);
-    scene.remove(sphere);
-
-
-    switch (e) {
-      case "cube":
-        scene.add(cube);
-
-        break;
-      case "sphere":
-        scene.add(sphere);
-
-        break;
-      case "plane":
-        scene.add(plane);
-        break;
-
-    }
-  });
-
-  gui.add(controls, 'switchRenderer');
-
 
 
   render();
@@ -230,11 +139,7 @@ function init() {
   function render() {
     stats.update();
 
-    cube.rotation.y = step += 0.01;
-    plane.rotation.y = step;
-    sphere.rotation.y = step;
-
-
+    selectedMesh.rotation.y = step += 0.01;
     // render using requestAnimationFrame
     requestAnimationFrame(render);
     renderer.render(scene, camera);

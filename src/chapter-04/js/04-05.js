@@ -18,23 +18,6 @@ function init() {
   // renderer.setSize(window.innerWidth, window.innerHeight);
   // renderer.shadowMapEnabled = false;
 
-  // create the ground plane
-  var planeGeometry = new THREE.PlaneGeometry(60, 40, 1, 1);
-  var planeMaterial = new THREE.MeshLambertMaterial({
-    color: 0xffffff
-  });
-  var plane = new THREE.Mesh(planeGeometry, planeMaterial);
-  plane.receiveShadow = true;
-
-  // rotate and position the plane
-  plane.rotation.x = -0.5 * Math.PI;
-  plane.position.x = 0;
-  plane.position.y = -2;
-  plane.position.z = 0;
-
-  // add the plane to the scene
-  scene.add(plane);
-
   // position and point the camera to the center of the scene
   // camera.position.x = -40;
   // camera.position.y = 40;
@@ -57,46 +40,46 @@ function init() {
   mats.push(new THREE.MeshBasicMaterial({
     color: 0x009e60
   }));
-  mats.push(new THREE.MeshBasicMaterial({
-    color: 0x009e60
-  }));
-  mats.push(new THREE.MeshBasicMaterial({
-    color: 0x0051ba
-  }));
+  // mats.push(new THREE.MeshBasicMaterial({
+    // color: 0x009e60
+  // }));
   mats.push(new THREE.MeshBasicMaterial({
     color: 0x0051ba
   }));
+  // mats.push(new THREE.MeshBasicMaterial({
+    // color: 0x0051ba
+  // }));
   mats.push(new THREE.MeshBasicMaterial({
     color: 0xffd500
   }));
-  mats.push(new THREE.MeshBasicMaterial({
-    color: 0xffd500
-  }));
-  mats.push(new THREE.MeshBasicMaterial({
-    color: 0xff5800
-  }));
+  // mats.push(new THREE.MeshBasicMaterial({
+    // color: 0xffd500
+  // }));
   mats.push(new THREE.MeshBasicMaterial({
     color: 0xff5800
   }));
+  // mats.push(new THREE.MeshBasicMaterial({
+    // color: 0xff5800
+  // }));
   mats.push(new THREE.MeshBasicMaterial({
     color: 0xC41E3A
   }));
-  mats.push(new THREE.MeshBasicMaterial({
-    color: 0xC41E3A
-  }));
-  mats.push(new THREE.MeshBasicMaterial({
-    color: 0xffffff
-  }));
+  // mats.push(new THREE.MeshBasicMaterial({
+    // color: 0xC41E3A
+  // }));
   mats.push(new THREE.MeshBasicMaterial({
     color: 0xffffff
   }));
+  // mats.push(new THREE.MeshBasicMaterial({
+    // color: 0xffffff
+  // }));
 
   for (var x = 0; x < 3; x++) {
     for (var y = 0; y < 3; y++) {
       for (var z = 0; z < 3; z++) {
         var cubeGeom = new THREE.BoxGeometry(2.9, 2.9, 2.9);
         var cube = new THREE.Mesh(cubeGeom, mats);
-        cube.position.set(x * 3 - 3, y * 3, z * 3 - 3);
+        cube.position.set(x * 3 - 3, y * 3 - 3, z * 3 - 3);
 
         group.add(cube);
       }
@@ -104,12 +87,13 @@ function init() {
   }
 
 
+  group.scale.copy(new THREE.Vector3(2,2,2))
   // call the render function
   scene.add(group);
   var step = 0;
 
   var controls = new function () {
-    this.rotationSpeed = 0.02;
+    this.rotationSpeed = 0.01;
     this.numberOfObjects = scene.children.length;
   };
 
@@ -118,11 +102,14 @@ function init() {
 
   render();
 
+  debugger;
+  
   function render() {
     stats.update();
 
-
     group.rotation.y = step += controls.rotationSpeed;
+    group.rotation.z = step -= controls.rotationSpeed;
+    group.rotation.x = step += controls.rotationSpeed;
     // render using requestAnimationFrame
     requestAnimationFrame(render);
     renderer.render(scene, camera);
