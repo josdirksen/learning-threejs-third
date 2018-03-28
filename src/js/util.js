@@ -152,6 +152,31 @@ function addGroundPlane(scene) {
     return plane;
 }
 
+/**
+ * Add a simple ground plance to the provided scene
+ * 
+ * @param {THREE.Scene} scene 
+ */
+function addLargeGroundPlane(scene) {
+    // create the ground plane
+    var planeGeometry = new THREE.PlaneGeometry(10000, 10000);
+    var planeMaterial = new THREE.MeshPhongMaterial({
+        color: 0xffffff
+    });
+    var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.receiveShadow = true;
+
+    // rotate and position the plane
+    plane.rotation.x = -0.5 * Math.PI;
+    plane.position.x = 0;
+    plane.position.y = 0;
+    plane.position.z = 0;
+
+    scene.add(plane);
+
+    return plane;
+}
+
 function addHouseAndTree(scene) {
 
     createBoundingWall(scene);
@@ -350,6 +375,72 @@ function addBasicMaterialSettings(gui, controls, material) {
     folder.add(controls.material, 'fog');
 }
 
+/**
+ * 
+ * 
+ * @param gui the gui to add to
+ * @param controls the current controls object
+ * @param material material for the meshes
+ */
+function addMeshSelection(gui, controls, material, scene) {
+  var sphereGeometry = new THREE.SphereGeometry(10, 20, 20);
+  var cubeGeometry = new THREE.BoxGeometry(16, 16, 15);
+  var planeGeometry = new THREE.PlaneGeometry(14, 14, 4, 4);
+
+  var sphere = new THREE.Mesh(sphereGeometry, material);
+  var cube = new THREE.Mesh(cubeGeometry, material);
+  var plane = new THREE.Mesh(planeGeometry, material);
+
+  sphere.position.x = 0;
+  sphere.position.y = 11;
+  sphere.position.z = 2;
+
+  cube.position.y = 8;
+
+  controls.selectedMesh = "cube";
+  loadGopher(material).then(function(gopher) {
+
+    gopher.scale.x = 5;
+    gopher.scale.y = 5;
+    gopher.scale.z = 5;
+    gopher.position.z = 0
+    gopher.position.x = -10
+    gopher.position.y = 0
+
+    gui.add(controls, 'selectedMesh', ["cube", "sphere", "plane", "gopher"]).onChange(function (e) {
+
+      scene.remove(controls.selected);
+  
+      switch (e) {
+        case "cube":
+          scene.add(cube);
+          controls.selected = cube;
+          break;
+        case "sphere":
+          scene.add(sphere);
+          controls.selected = sphere;
+          break;
+        case "plane":
+          scene.add(plane);
+          controls.selected = plane;
+          break;
+        case "gopher":
+          scene.add(gopher);
+          controls.selected = gopher;
+          break;
+      }
+    });
+  });
+
+  controls.selected = cube;
+  scene.add(controls.selected);
+}
+
+/**
+ * Load a gopher, and apply the material
+ * @param material if set apply this material to the gopher
+ * @returns promise which is fullfilled once the goher is loaded
+ */
 function loadGopher(material) {
     var loader = new THREE.OBJLoader();
     var mesh = null;
@@ -357,9 +448,9 @@ function loadGopher(material) {
         loader.load('../../assets/models/gopher/gopher.obj', function (loadedMesh) {
             // this is a group of meshes, so iterate until we reach a THREE.Mesh
             mesh = loadedMesh;
-            console.log(mesh);
             if (material) {
                 // material is defined, so overwrite the default material.
+                computeNormalsGroup(mesh);
                 setMaterialGroup(material, mesh);
             }
             resolve(mesh);
@@ -374,5 +465,24 @@ function setMaterialGroup(material, group) {
         group.material = material;        
     } else if (group instanceof THREE.Group) {
         group.children.forEach(function(child) {setMaterialGroup(material, child)});
+    }
+}
+
+function computeNormalsGroup(group) {
+    if (group instanceof THREE.Mesh) {
+        var tempGeom = new THREE.Geometry();
+        tempGeom.fromBufferGeometry(group.geometry)
+        tempGeom.computeFaceNormals();
+        tempGeom.mergeVertices();
+        tempGeom.computeVertexNormals();
+
+        tempGeom.normalsNeedUpdate = true;
+        
+        // group = new THREE.BufferGeometry();
+        // group.fromGeometry(tempGeom);
+        group.geometry = tempGeom;
+
+    } else if (group instanceof THREE.Group) {
+        group.children.forEach(function(child) {computeNormalsGroup(child)});
     }
 }

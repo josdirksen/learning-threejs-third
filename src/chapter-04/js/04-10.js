@@ -7,172 +7,52 @@ function init() {
 
   // create a scene, that will hold all our elements such as objects, cameras and lights.
   var scene = new THREE.Scene();
-
-  // add subtle ambient lighting
-  var ambientLight = new THREE.AmbientLight(0x0c0c0c);
-  scene.add(ambientLight);
+  addLargeGroundPlane(scene);
 
   // add spotlight for the shadows
   var spotLight = new THREE.SpotLight(0xffffff);
-  spotLight.position.set(-40, 60, -10);
+  spotLight.position.set(-0, 30, 60);
   spotLight.castShadow = true;
+  spotLight.intensity = 0.6;
   scene.add(spotLight);
-
-  // get the turtle
-  var points = gosper(4, 60);
-
-
-  var lines = new THREE.Geometry();
-  var colors = [];
-  var i = 0;
-  points.forEach(function (e) {
-    lines.vertices.push(new THREE.Vector3(e.x, e.z, e.y));
-    colors[i] = new THREE.Color(0xffffff);
-    colors[i].setHSL(e.x / 100 + 0.5, (e.y * 20) / 300, 0.8);
-    i++;
-  });
-
-  lines.colors = colors;
-
-  lines.computeLineDistances();
-  var material = new THREE.LineDashedMaterial({
-    vertexColors: true,
-    color: 0xffffff,
-    dashSize: 2,
-    gapSize: 2,
-    scale: 0.1
-  });
-
-  var line = new THREE.Line(lines, material);
-  line.position.set(25, -30, -60);
-  scene.add(line);
 
   // call the render function
   var step = 0;
+  var material = new THREE.MeshPhysicalMaterial({color: 0x7777ff})
+  var controls = new function () {
+    this.color = material.color.getStyle();
+    this.emissive = material.emissive.getStyle();
+  };
+
+  var gui = new dat.GUI();
+  
+  addBasicMaterialSettings(gui, controls, material);
+  addMeshSelection(gui, controls, material, scene);
+  var spGui = gui.addFolder("THREE.MeshPhysicalMaterial");
+  spGui.addColor(controls, 'color').onChange(function (e) {
+    material.color.setStyle(e)
+  });
+  spGui.addColor(controls, 'emissive').onChange(function (e) {
+    material.emissive = new THREE.Color(e);
+  });
+  spGui.add(material, 'metalness', 0, 1, 0.01);
+  spGui.add(material, 'roughness', 0, 1, 0.01);
+  spGui.add(material, 'clearCoat', 0, 1, 0.01);
+  spGui.add(material, 'clearCoatRoughness', 0, 1, 0.01);
+  spGui.add(material, 'reflectivity', 0, 1, 0.01);
+  spGui.add(material, 'wireframe');
+  spGui.add(material, 'wireframeLinewidth', 0, 20);
+
+  camera.lookAt(controls.selected.position);
   render();
 
   function render() {
     stats.update();
-    line.rotation.z = step += 0.01;
 
+    if (controls.selected) controls.selected.rotation.y = step += 0.01;
+
+    // render using requestAnimationFrame
     requestAnimationFrame(render);
     renderer.render(scene, camera);
   }
-
-  function gosper(a, b) {
-
-    var turtle = [0, 0, 0];
-    var points = [];
-    var count = 0;
-
-    rg(a, b, turtle);
-
-
-    return points;
-
-    function rt(x) {
-      turtle[2] += x;
-    }
-
-    function lt(x) {
-      turtle[2] -= x;
-    }
-
-    function fd(dist) {
-      //                ctx.beginPath();
-      points.push({
-        x: turtle[0],
-        y: turtle[1],
-        z: Math.sin(count) * 5
-      });
-      //                ctx.moveTo(turtle[0], turtle[1]);
-
-      var dir = turtle[2] * (Math.PI / 180);
-      turtle[0] += Math.cos(dir) * dist;
-      turtle[1] += Math.sin(dir) * dist;
-
-      points.push({
-        x: turtle[0],
-        y: turtle[1],
-        z: Math.sin(count) * 5
-      });
-      //                ctx.lineTo(turtle[0], turtle[1]);
-      //                ctx.stroke();
-
-    }
-
-    function rg(st, ln, turtle) {
-
-      st--;
-      ln = ln / 2.6457;
-      if (st > 0) {
-        //                    ctx.strokeStyle = '#111';
-        rg(st, ln, turtle);
-        rt(60);
-        gl(st, ln, turtle);
-        rt(120);
-        gl(st, ln, turtle);
-        lt(60);
-        rg(st, ln, turtle);
-        lt(120);
-        rg(st, ln, turtle);
-        rg(st, ln, turtle);
-        lt(60);
-        gl(st, ln, turtle);
-        rt(60);
-      }
-      if (st == 0) {
-        fd(ln);
-        rt(60);
-        fd(ln);
-        rt(120);
-        fd(ln);
-        lt(60);
-        fd(ln);
-        lt(120);
-        fd(ln);
-        fd(ln);
-        lt(60);
-        fd(ln);
-        rt(60)
-      }
-    }
-
-    function gl(st, ln, turtle) {
-      st--;
-      ln = ln / 2.6457;
-      if (st > 0) {
-        //                    ctx.strokeStyle = '#555';
-        lt(60);
-        rg(st, ln, turtle);
-        rt(60);
-        gl(st, ln, turtle);
-        gl(st, ln, turtle);
-        rt(120);
-        gl(st, ln, turtle);
-        rt(60);
-        rg(st, ln, turtle);
-        lt(120);
-        rg(st, ln, turtle);
-        lt(60);
-        gl(st, ln, turtle);
-      }
-      if (st == 0) {
-        lt(60);
-        fd(ln);
-        rt(60);
-        fd(ln);
-        fd(ln);
-        rt(120);
-        fd(ln);
-        rt(60);
-        fd(ln);
-        lt(120);
-        fd(ln);
-        lt(60);
-        fd(ln);
-      }
-    }
-  }
-
 }

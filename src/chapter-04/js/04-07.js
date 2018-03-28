@@ -7,34 +7,7 @@ function init() {
 
   // create a scene, that will hold all our elements such as objects, cameras and lights.
   var scene = new THREE.Scene();
-
-  var groundGeom = new THREE.PlaneGeometry(100, 100, 4, 4);
-  var groundMesh = new THREE.Mesh(groundGeom, new THREE.MeshBasicMaterial({
-    color: 0x555555
-  }));
-  groundMesh.rotation.x = -Math.PI / 2;
-  groundMesh.position.y = -20;
-  scene.add(groundMesh);
-
-  var sphereGeometry = new THREE.SphereGeometry(14, 20, 20);
-  var cubeGeometry = new THREE.BoxGeometry(15, 15, 15);
-  var planeGeometry = new THREE.PlaneGeometry(14, 14, 4, 4);
-  var meshMaterial = new THREE.MeshStandardMaterial({
-    color: 0x7777ff
-  });
-  var sphere = new THREE.Mesh(sphereGeometry, meshMaterial);
-  var cube = new THREE.Mesh(cubeGeometry, meshMaterial);
-  var plane = new THREE.Mesh(planeGeometry, meshMaterial);
-
-  // position the sphere
-  sphere.position.x = 0;
-  sphere.position.y = 3;
-  sphere.position.z = 2;
-
-  cube.position = sphere.position;
-  plane.position = sphere.position;
-  // add the sphere to the scene
-  scene.add(cube);
+  addLargeGroundPlane(scene);
 
   // add spotlight for the shadows
   var spotLight = new THREE.SpotLight(0xffffff);
@@ -45,96 +18,38 @@ function init() {
 
   // call the render function
   var step = 0;
-
+  var material = new THREE.MeshPhongMaterial({color: 0x7777ff})
   var controls = new function () {
-    this.rotationSpeed = 0.02;
-    this.bouncingSpeed = 0.03;
-
-    this.opacity = meshMaterial.opacity;
-    this.transparent = meshMaterial.transparent;
-    this.overdraw = meshMaterial.overdraw;
-    this.visible = meshMaterial.visible;
-    this.color = meshMaterial.color.getStyle();
-    this.emissive = meshMaterial.emissive.getHex();
-    this.roughness = meshMaterial.roughness;
-    this.metalness = meshMaterial.metalness;
-    this.side = "front";
-    this.metal = false;
-    this.selectedMesh = "cube";
-
+    this.color = material.color.getStyle();
+    this.emissive = material.emissive.getStyle();
+    this.specular = material.specular.getStyle();
   };
 
   var gui = new dat.GUI();
-
-
-  var spGui = gui.addFolder("Mesh");
-  spGui.add(controls, 'opacity', 0, 1).onChange(function (e) {
-    meshMaterial.opacity = e
-  });
-  spGui.add(controls, 'transparent').onChange(function (e) {
-    meshMaterial.transparent = e
-  });
-  spGui.add(controls, 'visible').onChange(function (e) {
-    meshMaterial.visible = e
+  
+  addBasicMaterialSettings(gui, controls, material);
+  addMeshSelection(gui, controls, material, scene);
+  var spGui = gui.addFolder("THREE.MeshPhongMaterial");
+  spGui.addColor(controls, 'color').onChange(function (e) {
+    material.color.setStyle(e)
   });
   spGui.addColor(controls, 'emissive').onChange(function (e) {
-    meshMaterial.emissive = new THREE.Color(e)
+    material.emissive = new THREE.Color(e);
   });
-
-  spGui.add(controls, 'side', ["front", "back", "double"]).onChange(function (e) {
-    console.log(e);
-    switch (e) {
-      case "front":
-        meshMaterial.side = THREE.FrontSide;
-        break;
-      case "back":
-        meshMaterial.side = THREE.BackSide;
-        break;
-      case "double":
-        meshMaterial.side = THREE.DoubleSide;
-        break;
-    }
-    meshMaterial.needsUpdate = true;
-    console.log(meshMaterial);
+  spGui.addColor(controls, 'specular').onChange(function (e) {
+    material.specular = new THREE.Color(e);
   });
-  spGui.addColor(controls, 'color').onChange(function (e) {
-    meshMaterial.color.setStyle(e)
-  });
-  spGui.add(controls, 'selectedMesh', ["cube", "sphere", "plane"]).onChange(function (e) {
+  spGui.add(material, 'shininess', 0, 100, )
+  spGui.add(material, 'wireframe');
+  spGui.add(material, 'wireframeLinewidth', 0, 20);
 
-    scene.remove(plane);
-    scene.remove(cube);
-    scene.remove(sphere);
-
-    switch (e) {
-      case "cube":
-        scene.add(cube);
-        break;
-      case "sphere":
-        scene.add(sphere);
-        break;
-      case "plane":
-        scene.add(plane);
-        break;
-
-    }
-
-    scene.add(e);
-  });
-
-  spGui.add(controls, 'metal').onChange(function (e) {
-    meshMaterial.metal = e;
-    meshMaterial.needsUpdate = true;
-  });
-
+  camera.lookAt(controls.selected.position);
   render();
 
   function render() {
     stats.update();
 
-    cube.rotation.y = step += 0.01;
-    plane.rotation.y = step;
-    sphere.rotation.y = step;
+    if (controls.selected) controls.selected.rotation.y = step += 0.01;
 
     // render using requestAnimationFrame
     requestAnimationFrame(render);
