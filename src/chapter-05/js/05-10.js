@@ -2,73 +2,67 @@ function init() {
 
   // use the defaults
   var stats = initStats();
-  var camera = initCamera();
   var renderer = initRenderer();
+  var camera = initCamera();
 
   // create a scene, that will hold all our elements such as objects, cameras and lights.
+  // and add some simple default lights
   var scene = new THREE.Scene();
+  initDefaultLighting(scene);
+  addLargeGroundPlane(scene).position.y = -10;
 
-  var knot = createMesh(new THREE.TorusKnotGeometry(10, 1, 64, 8, 2, 3));
-  // add the sphere to the scene
-  scene.add(knot);
-
-  // call the render function
-  var step = 0;
-
-  // setup the control gui
+  // setup the control parts of the ui
   var controls = new function () {
-    // we need the first child, since it's a multimaterial
-    this.radius = knot.children[0].geometry.parameters.radius;
+    var self = this;
+
+    // the start geometry and material. Used as the base for the settings in the control UI
+    this.appliedMaterial = applyMeshNormalMaterial
+    this.castShadow = true;
+
+    var baseGeom = new THREE.TorusKnotGeometry();
+
+    this.radius = baseGeom.parameters.radius ? baseGeom.parameters.radius : 1;
     this.tube = 0.3;
-    this.radialSegments = knot.children[0].geometry.parameters.radialSegments;
-    this.tubularSegments = knot.children[0].geometry.parameters.tubularSegments;
-    this.p = knot.children[0].geometry.parameters.p;
-    this.q = knot.children[0].geometry.parameters.q;
-    this.heightScale = 1;
-
+    this.radialSegments = baseGeom.parameters.radialSegments ? baseGeom.parameters.radialSegments : 8;
+    this.tubularSegments = baseGeom.parameters.tubularSegments ? baseGeom.parameters.tubularSegments : 64;
+    this.p = 2;
+    this.q = 3;
+    
+    // redraw function, updates the control UI and recreates the geometry.
     this.redraw = function () {
-      // remove the old plane
-      scene.remove(knot);
-      // create a new one
-
-      knot = createMesh(new THREE.TorusKnotGeometry(controls.radius, controls.tube, Math.round(
-        controls.radialSegments), Math.round(controls.tubularSegments), Math.round(
-        controls.p), Math.round(controls.q)));
-      // add it to the scene.
-      scene.add(knot);
+      redrawGeometryAndUpdateUI(gui, scene, controls, function() {
+        return new THREE.TorusKnotGeometry(controls.radius, controls.tube, Math.round(
+                  controls.tubularSegments), Math.round(controls.radialSegments), Math.round(
+                  controls.p), Math.round(controls.q))
+      });
     };
   };
 
+  // create the GUI with the specific settings for this geometry
   var gui = new dat.GUI();
-  gui.add(controls, 'radius', 0, 40).onChange(controls.redraw);
-  gui.add(controls, 'tube', 0, 40).onChange(controls.redraw);
+  gui.add(controls, 'radius', 0, 10).onChange(controls.redraw);
+  gui.add(controls, 'tube', 0, 10).onChange(controls.redraw);
   gui.add(controls, 'radialSegments', 0, 400).step(1).onChange(controls.redraw);
-  gui.add(controls, 'tubularSegments', 1, 20).step(1).onChange(controls.redraw);
+  gui.add(controls, 'tubularSegments', 1, 200).step(1).onChange(controls.redraw);
   gui.add(controls, 'p', 1, 10).step(1).onChange(controls.redraw);
   gui.add(controls, 'q', 1, 15).step(1).onChange(controls.redraw);
-  // gui.add(controls, 'heightScale', 0, 5).onChange(controls.redraw);
 
+  // add a material section, so we can switch between materials
+  gui.add(controls, 'appliedMaterial', {
+    meshNormal: applyMeshNormalMaterial, 
+    meshStandard: applyMeshStandardMaterial
+  }).onChange(controls.redraw)
 
+  gui.add(controls, 'castShadow').onChange(function(e) {controls.mesh.castShadow = e})
+
+  // initialize the first redraw so everything gets initialized
+  controls.redraw();
+  var step = 0;
+  // call the render function
   render();
-
-  function createMesh(geom) {
-
-    // assign two materials
-    var meshMaterial = new THREE.MeshNormalMaterial({});
-    meshMaterial.side = THREE.DoubleSide;
-
-    // create a multimaterial
-    var mesh = THREE.SceneUtils.createMultiMaterialObject(geom, [meshMaterial]);
-
-    return mesh;
-  }
-
   function render() {
     stats.update();
-
-    knot.rotation.y = step += 0.01;
-
-    // render using requestAnimationFrame
+    controls.mesh.rotation.y = step+=0.01
     requestAnimationFrame(render);
     renderer.render(scene, camera);
   }

@@ -1,73 +1,63 @@
-function init() {
 
-  // use the defaults
-  var stats = initStats();
-  var camera = initCamera();
-  var renderer = initRenderer();
-  var scene = new THREE.Scene();
+  function init() {
+
+    // use the defaults
+    var stats = initStats();
+    var renderer = initRenderer();
 
 
-  var circle = createMesh(new THREE.CircleGeometry(4, 10, 0.3 * Math.PI * 2, 0.3 * Math.PI * 2));
-  // add the sphere to the scene
-  scene.add(circle);
+    var camera = initCamera();
+  
+    // create a scene, that will hold all our elements such as objects, cameras and lights.
+    // and add some simple default lights
+    var scene = new THREE.Scene();
+    addLargeGroundPlane(scene).position.y = -10;
+    initDefaultLighting(scene);
+  
+    // setup the control parts of the ui
+    var controls = new function () {
+      var self = this;
+  
+      // the start geometry and material. Used as the base for the settings in the control UI
+      this.appliedMaterial = applyMeshNormalMaterial
+      this.castShadow = true;
 
-  // add spotlight for the shadows
-  var spotLight = new THREE.SpotLight(0xffffff);
-  spotLight.position.set(-40, 60, -10);
-  scene.add(spotLight);
-
-  // call the render function
-  var step = 0;
-
-  // setup the control gui
-  var controls = new function () {
-    // we need the first child, since it's a multimaterial
-    this.radius = 4;
-
-    this.thetaStart = 0.3 * Math.PI * 2;
-    this.thetaLength = 0.3 * Math.PI * 2;
-    this.segments = 10;
-
-    this.redraw = function () {
-      // remove the old plane
-      scene.remove(circle);
-      // create a new one
-      circle = createMesh(new THREE.CircleGeometry(controls.radius, controls.segments, controls.thetaStart,
-        controls.thetaLength));
-      // add it to the scene.
-      scene.add(circle);
+      this.radius = 4;
+      this.thetaStart = 0.3 * Math.PI * 2;
+      this.thetaLength = 0.3 * Math.PI * 2;
+      this.segments = 10;
+  
+      // redraw function, updates the control UI and recreates the geometry.
+      this.redraw = function () {
+        redrawGeometryAndUpdateUI(gui, scene, controls, function() {
+          return new THREE.CircleGeometry(self.radius, self.segments, self.thetaStart, self.thetaLength);
+        });
+      };
     };
-  };
+  
+    // create the GUI with the specific settings for this geometry
+    var gui = new dat.GUI();
+    gui.add(controls, 'radius', 0, 40).onChange(controls.redraw);
+    gui.add(controls, 'segments', 0, 40).onChange(controls.redraw);
+    gui.add(controls, 'thetaStart', 0, 2 * Math.PI).onChange(controls.redraw);
+    gui.add(controls, 'thetaLength', 0, 2 * Math.PI).onChange(controls.redraw);
+    // add a material section, so we can switch between materials
+    gui.add(controls, 'appliedMaterial', {
+      meshNormal: applyMeshNormalMaterial, 
+      meshStandard: applyMeshStandardMaterial
+    }).onChange(controls.redraw)
 
-  var gui = new dat.GUI();
-  gui.add(controls, 'radius', 0, 40).onChange(controls.redraw);
-  gui.add(controls, 'segments', 0, 40).onChange(controls.redraw);
-  gui.add(controls, 'thetaStart', 0, 2 * Math.PI).onChange(controls.redraw);
-  gui.add(controls, 'thetaLength', 0, 2 * Math.PI).onChange(controls.redraw);
-  render();
-
-  function createMesh(geom) {
-
-    // assign two materials
-    var meshMaterial = new THREE.MeshNormalMaterial();
-    meshMaterial.side = THREE.DoubleSide;
-    var wireFrameMat = new THREE.MeshBasicMaterial();
-    wireFrameMat.wireframe = true;
-
-    // create a multimaterial
-    var mesh = THREE.SceneUtils.createMultiMaterialObject(geom, [meshMaterial, wireFrameMat]);
-
-
-    return mesh;
+    gui.add(controls, 'castShadow').onChange(function(e) {controls.mesh.castShadow = e})
+  
+    // initialize the first redraw so everything gets initialized
+    controls.redraw();
+    var step = 0;
+    // call the render function
+    render();
+    function render() {
+      stats.update();
+      controls.mesh.rotation.y = step+=0.01
+      requestAnimationFrame(render);
+      renderer.render(scene, camera);
+    }
   }
-
-  function render() {
-    stats.update();
-
-    circle.rotation.y = step += 0.01;
-
-    // render using requestAnimationFrame
-    requestAnimationFrame(render);
-    renderer.render(scene, camera);
-  }
-}

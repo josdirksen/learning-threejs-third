@@ -2,46 +2,43 @@ function init() {
 
   // use the defaults
   var stats = initStats();
-  var camera = initCamera();
   var renderer = initRenderer();
+  var camera = initCamera();
+
+  // create a scene, that will hold all our elements such as objects, cameras and lights.
+  // and add some simple default lights
   var scene = new THREE.Scene();
+  initDefaultLighting(scene);
+  addLargeGroundPlane(scene).position.y = -10;
 
-  var cube = createMesh(new THREE.BoxGeometry(10, 10, 10, 1, 1, 1));
-  // add the sphere to the scene
-  scene.add(cube);
-
-  // add spotlight for the shadows
-  var spotLight = new THREE.SpotLight(0xffffff);
-  spotLight.position.set(-40, 60, -10);
-  scene.add(spotLight);
-
-  // call the render function
-  var step = 0;
-
-  // setup the control gui
+  // setup the control parts of the ui
   var controls = new function () {
+    var self = this;
 
-    this.width = cube.children[0].geometry.parameters.width;
-    this.height = cube.children[0].geometry.parameters.height;
-    this.depth = cube.children[0].geometry.parameters.depth;
+    // the start geometry and material. Used as the base for the settings in the control UI
+    this.appliedMaterial = applyMeshNormalMaterial
+    this.castShadow = true;
+    
+    var baseGeom = new THREE.BoxGeometry(4, 10, 10, 4, 4, 4);
+    this.width = baseGeom.parameters.width;
+    this.height = baseGeom.parameters.height;
+    this.depth = baseGeom.parameters.depth;
 
-    this.widthSegments = cube.children[0].geometry.parameters.widthSegments;
-    this.heightSegments = cube.children[0].geometry.parameters.heightSegments;
-    this.depthSegments = cube.children[0].geometry.parameters.depthSegments;
+    this.widthSegments = baseGeom.parameters.widthSegments;
+    this.heightSegments = baseGeom.parameters.heightSegments;
+    this.depthSegments = baseGeom.parameters.depthSegments;
 
-
+    // redraw function, updates the control UI and recreates the geometry.
     this.redraw = function () {
-      // remove the old plane
-      scene.remove(cube);
-      // create a new one
-      cube = createMesh(new THREE.BoxGeometry(controls.width, controls.height, controls.depth, Math.round(
-        controls.widthSegments), Math.round(controls.heightSegments), Math.round(
-        controls.depthSegments)));
-      // add it to the scene.
-      scene.add(cube);
+      redrawGeometryAndUpdateUI(gui, scene, controls, function() {
+        return new THREE.BoxGeometry(controls.width, controls.height, controls.depth, Math.round(
+                   controls.widthSegments), Math.round(controls.heightSegments), Math.round(
+                   controls.depthSegments));
+      });
     };
   };
 
+  // create the GUI with the specific settings for this geometry
   var gui = new dat.GUI();
   gui.add(controls, 'width', 0, 40).onChange(controls.redraw);
   gui.add(controls, 'height', 0, 40).onChange(controls.redraw);
@@ -49,28 +46,23 @@ function init() {
   gui.add(controls, 'widthSegments', 0, 10).onChange(controls.redraw);
   gui.add(controls, 'heightSegments', 0, 10).onChange(controls.redraw);
   gui.add(controls, 'depthSegments', 0, 10).onChange(controls.redraw);
+  // add a material section, so we can switch between materials
+  gui.add(controls, 'appliedMaterial', {
+    meshNormal: applyMeshNormalMaterial, 
+    meshStandard: applyMeshStandardMaterial
+  }).onChange(controls.redraw)
+
+  gui.add(controls, 'castShadow').onChange(function(e) {controls.mesh.castShadow = e})
+
+  // initialize the first redraw so everything gets initialized
+  controls.redraw();
+  var step = 0;
+  // call the render function
   render();
-
-  function createMesh(geom) {
-
-    // assign two materials
-    var meshMaterial = new THREE.MeshNormalMaterial();
-    meshMaterial.side = THREE.DoubleSide;
-    var wireFrameMat = new THREE.MeshBasicMaterial();
-    wireFrameMat.wireframe = true;
-
-    // create a multimaterial
-    var mesh = THREE.SceneUtils.createMultiMaterialObject(geom, [meshMaterial, wireFrameMat]);
-
-    return mesh;
-  }
-
   function render() {
     stats.update();
-    cube.rotation.y = step += 0.01;
-    // render using requestAnimationFrame
+    controls.mesh.rotation.y = step+=0.01
     requestAnimationFrame(render);
     renderer.render(scene, camera);
   }
-
 }

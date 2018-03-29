@@ -25,6 +25,9 @@ function initRenderer(additionalProperties) {
 
     var props = (typeof additionalProperties !== 'undefined' && additionalProperties) ? additionalProperties : {};
     var renderer = new THREE.WebGLRenderer(props);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMapSoft = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     renderer.setClearColor(new THREE.Color(0x000000));
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -63,6 +66,22 @@ function initCamera(initialPosition) {
     return camera;
 }
 
+function initDefaultLighting(scene, initialPosition) {
+    var position = (initialPosition !== undefined) ? initialPosition : new THREE.Vector3(-10, 30, 40);
+    
+    var spotLight = new THREE.SpotLight(0xffffff);
+    spotLight.position.copy(position);
+    spotLight.shadow.mapSize.width = 2048;
+    spotLight.shadow.mapSize.height = 2048;
+    spotLight.shadow.camera.fov = 15;
+    spotLight.castShadow = true;
+
+    scene.add(spotLight);
+
+    var ambientLight = new THREE.AmbientLight(0x343434);
+    scene.add(ambientLight);
+}
+
 /**
  * Initialize trackball controls to control the scene
  * 
@@ -81,6 +100,39 @@ function initTrackballControls(camera, renderer) {
     trackballControls.keys = [65, 83, 68];
 
     return trackballControls;
+}
+
+/**
+ * Apply a simple standard material to the passed in geometry and return the mesh
+ * 
+ * @param {*} geometry 
+ * @param {*} material if provided use this meshnormal material instead of creating a new material 
+ *                     this material will only be used if it is a meshnormal material.
+ */
+var applyMeshStandardMaterial = function(geometry, material) {
+    if (!material || material.type !== "MeshStandardMaterial")  {
+        var material = new THREE.MeshStandardMaterial({color: 0xff0000})
+        material.side = THREE.DoubleSide;
+    } 
+
+    return new THREE.Mesh(geometry, material)
+}
+
+/**
+ * Apply meshnormal material to the geometry, optionally specifying whether
+ * we want to see a wireframe as well.
+ * 
+ * @param {*} geometry 
+ * @param {*} material if provided use this meshnormal material instead of creating a new material 
+ *                     this material will only be used if it is a meshnormal material.
+ */
+var applyMeshNormalMaterial = function(geometry, material) {
+    if (!material || material.type !== "MeshNormalMaterial")  {
+        material = new THREE.MeshNormalMaterial();
+        material.side = THREE.DoubleSide;
+    } 
+    
+    return new THREE.Mesh(geometry, material)
 }
 
 /**
@@ -373,6 +425,66 @@ function addBasicMaterialSettings(gui, controls, material) {
         material.vertexColors = parseInt(vertexColors);
     });
     folder.add(controls.material, 'fog');
+
+    return folder;
+}
+
+function addSpecificMaterialSettings(gui, controls, material) {
+    controls.material = material;
+    
+    var folder = gui.addFolder('THREE.' + material.type);
+    switch (material.type) {
+        case "MeshNormalMaterial":
+            folder.add(controls.material,'wireframe');
+            return folder;
+            
+        case "MeshStandardMaterial":
+            controls.color = material.color.getStyle();
+            folder.addColor(controls, 'color').onChange(function (e) {
+                material.color.setStyle(e)
+            });
+            controls.emissive = material.emissive.getStyle();
+            folder.addColor(controls, 'emissive').onChange(function (e) {
+                material.emissive.setStyle(e)                
+            });
+            folder.add(material, 'metalness', 0, 1, 0.01);
+            folder.add(material, 'roughness', 0, 1, 0.01);
+            folder.add(material, 'wireframe');
+
+            return folder;
+    }
+}
+
+function redrawGeometryAndUpdateUI(gui, scene, controls, geomFunction) {
+    guiRemoveFolder(gui, controls.specificMaterialFolder);
+    guiRemoveFolder(gui, controls.currentMaterialFolder);
+    if (controls.mesh) scene.remove(controls.mesh)
+    var changeMat = eval("(" + controls.appliedMaterial + ")")
+    if (controls.mesh) {
+        controls.mesh = changeMat(geomFunction(), controls.mesh.material);
+    } else {
+        controls.mesh = changeMat(geomFunction());
+    }
+    
+    controls.mesh.castShadow = controls.castShadow;
+    scene.add(controls.mesh)
+    controls.currentMaterialFolder = addBasicMaterialSettings(gui, controls, controls.mesh.material);
+    controls.specificMaterialFolder = addSpecificMaterialSettings(gui, controls, controls.mesh.material);
+  }
+
+/**
+ * Remove a folder from the dat.gui
+ * 
+ * @param {*} gui 
+ * @param {*} folder 
+ */
+function guiRemoveFolder(gui, folder) {
+    if (folder && folder.name && gui.__folders[folder.name]) {
+        gui.__folders[folder.name].close();
+        gui.__folders[folder.name].domElement.parentNode.parentNode.removeChild(gui.__folders[folder.name].domElement.parentNode);
+        delete gui.__folders[folder.name];
+        gui.onResize();
+    }
 }
 
 /**
