@@ -8,7 +8,8 @@ function init() {
   // create a scene, that will hold all our elements such as objects, cameras and lights.
   // and add some simple default lights
   var scene = new THREE.Scene();
-  addLargeGroundPlane(scene).position.y = -10;
+  var groundPlane = addLargeGroundPlane(scene)
+  groundPlane.position.y = -10;
   initDefaultLighting(scene);
 
   // setup the control parts of the ui
@@ -18,6 +19,7 @@ function init() {
     // the start geometry and material. Used as the base for the settings in the control UI
     this.appliedMaterial = applyMeshNormalMaterial
     this.castShadow = true;
+    this.groundPlaneVisible = true;
 
     this.planeGeometry = new THREE.PlaneGeometry(20,20,4,4);
     this.width = this.planeGeometry.parameters.width;
@@ -46,6 +48,7 @@ function init() {
   }).onChange(controls.redraw)
 
   gui.add(controls, 'castShadow').onChange(function(e) {controls.mesh.castShadow = e})
+  gui.add(controls, 'groundPlaneVisible').onChange(function(e) {groundPlane.material.visible = e})
 
   // initialize the first redraw so everything gets initialized
   controls.redraw();
@@ -55,6 +58,8 @@ function init() {
   function render() {
     stats.update();
     controls.mesh.rotation.y = step+=0.01
+    controls.mesh.rotation.x = step
+    controls.mesh.rotation.z = step
     requestAnimationFrame(render);
     renderer.render(scene, camera);
   }

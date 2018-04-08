@@ -1,3 +1,4 @@
+
 function init() {
 
   // use the defaults
@@ -8,9 +9,8 @@ function init() {
   // create a scene, that will hold all our elements such as objects, cameras and lights.
   // and add some simple default lights
   var scene = new THREE.Scene();
-  var groundPlane = addLargeGroundPlane(scene)
-  groundPlane.position.y = -30;
   initDefaultLighting(scene);
+  addLargeGroundPlane(scene).position.y = -10;
 
   // setup the control parts of the ui
   var controls = new function () {
@@ -21,36 +21,51 @@ function init() {
     this.castShadow = true;
     this.groundPlaneVisible = true;
 
-    this.radiusTop = 20;
-    this.radiusBottom = 20;
-    this.height = 20;
-    this.radialSegments = 8;
-    this.heightSegments = 8;
-    this.openEnded = false;
-    this.thetaStart = 0;
-    this.thetaLength = 2 * Math.PI;
+    this.radius = 10;
+    this.detail = 0;
+    this.type = 'Icosahedron';
     
     // redraw function, updates the control UI and recreates the geometry.
     this.redraw = function () {
       redrawGeometryAndUpdateUI(gui, scene, controls, function() {
-        return new THREE.CylinderGeometry(controls.radiusTop, controls.radiusBottom,
-                  controls.height, controls.radialSegments, controls.heightSegments, controls.openEnded,
-                  controls.thetaStart, controls.thetaLength
-                )
+        var polyhedron;
+        switch (controls.type) {
+                  case 'Icosahedron':
+                    polyhedron = new THREE.IcosahedronGeometry(controls.radius, controls.detail);
+                    break;
+                  case 'Tetrahedron':
+                    polyhedron = new THREE.TetrahedronGeometry(controls.radius, controls.detail);
+                    break;
+                  case 'Octahedron':
+                    polyhedron = new THREE.OctahedronGeometry(controls.radius, controls.detail);
+                    break;
+                  case 'Dodecahedron':
+                    polyhedron = new THREE.DodecahedronGeometry(controls.radius, controls.detail);
+                    break;
+                  case 'Custom':
+                    var vertices = [
+                      1, 1, 1, -1, -1, 1, -1, 1, -1, 1, -1, -1
+                    ];
+          
+                    var indices = [
+                      2, 1, 0, 0, 3, 2, 1, 3, 0, 2, 3, 1
+                    ];
+          
+                    polyhedron = new THREE.PolyhedronGeometry(vertices, indices, controls.radius, controls.detail);
+                    break;
+                }
+
+        return polyhedron
       });
     };
   };
 
   // create the GUI with the specific settings for this geometry
   var gui = new dat.GUI();
-  gui.add(controls, 'radiusTop', -40, 40).onChange(controls.redraw);
-  gui.add(controls, 'radiusBottom', -40, 40).onChange(controls.redraw);
-  gui.add(controls, 'height', 0, 40).onChange(controls.redraw);
-  gui.add(controls, 'radialSegments', 1, 20).step(1).onChange(controls.redraw);
-  gui.add(controls, 'heightSegments', 1, 20).step(1).onChange(controls.redraw);
-  gui.add(controls, 'openEnded').onChange(controls.redraw);
-  gui.add(controls, 'thetaStart', 0, 2 * Math.PI).onChange(controls.redraw);
-  gui.add(controls, 'thetaLength', 0, 2 * Math.PI).onChange(controls.redraw);
+  gui.add(controls, 'radius', 0, 40).step(1).onChange(controls.redraw);
+  gui.add(controls, 'detail', 0, 3).step(1).onChange(controls.redraw);
+  gui.add(controls, 'type', ['Icosahedron', 'Tetrahedron', 'Octahedron', 'Dodecahedron', 'Custom']).onChange(controls.redraw);
+
 
   // add a material section, so we can switch between materials
   gui.add(controls, 'appliedMaterial', {
