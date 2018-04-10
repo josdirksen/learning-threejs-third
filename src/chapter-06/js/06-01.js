@@ -6,34 +6,45 @@ function init() {
   var camera = initCamera();
 
   // create a scene, that will hold all our elements such as objects, cameras and lights.
+  // and add some simple default lights
   var scene = new THREE.Scene();
+  initDefaultLighting(scene);
+  var groundPlane = addLargeGroundPlane(scene)
+  groundPlane.position.y = -30;
 
-  // call the render function
   var step = 0;
-  // the points group
   var spGroup;
-  // the mesh
-  var hullMesh;
-
-  generatePoints();
 
   // setup the control gui
   var controls = new function () {
-    // we need the first child, since it's a multimaterial
+    this.appliedMaterial = applyMeshNormalMaterial
+    this.castShadow = true;
+    this.groundPlaneVisible = true;
 
     this.redraw = function () {
-      scene.remove(spGroup);
-      scene.remove(hullMesh);
-      generatePoints();
+      redrawGeometryAndUpdateUI(gui, scene, controls, function() {
+        return generatePoints()
+      });
     };
   };
 
   var gui = new dat.GUI();
-  gui.add(controls, 'redraw');
+  gui.add(controls, 'appliedMaterial', {
+    meshNormal: applyMeshNormalMaterial, 
+    meshStandard: applyMeshStandardMaterial
+  }).onChange(controls.redraw)
 
+  gui.add(controls, 'redraw');
+  gui.add(controls, 'castShadow').onChange(function(e) {controls.mesh.castShadow = e})
+  gui.add(controls, 'groundPlaneVisible').onChange(function(e) {groundPlane.material.visible = e})
+
+  controls.redraw();
+  var step = 0;
   render();
 
   function generatePoints() {
+
+    if (spGroup) scene.remove(spGroup)
     // add 10 random spheres
     var points = [];
     for (var i = 0; i < 20; i++) {
@@ -61,35 +72,24 @@ function init() {
 
     // use the same points to create a convexgeometry
     var hullGeometry = new THREE.ConvexGeometry(points);
-    hullMesh = createMesh(hullGeometry);
-    scene.add(hullMesh);
-  }
-
-  function createMesh(geom) {
-
-    // assign two materials
-    var meshMaterial = new THREE.MeshBasicMaterial({
-      color: 0x00ff00,
-      transparent: true,
-      opacity: 0.2
-    });
-    meshMaterial.side = THREE.DoubleSide;
-    var wireFrameMat = new THREE.MeshBasicMaterial();
-    wireFrameMat.wireframe = true;
-
-    // create a multimaterial
-    var mesh = THREE.SceneUtils.createMultiMaterialObject(geom, [meshMaterial, wireFrameMat]);
-
-    return mesh;
+    hullGeometry.computeVertexNormals();
+    hullGeometry.computeFaceNormals();
+    hullGeometry.normalsNeedUpdate = true;
+    return hullGeometry;
   }
 
   function render() {
     stats.update();
+    controls.mesh.rotation.y = step+=0.005
+    controls.mesh.rotation.x = step
+    controls.mesh.rotation.z = step
 
-    spGroup.rotation.y = step;
-    hullMesh.rotation.y = step += 0.01;
+    if (spGroup) {
+      spGroup.rotation.y = step
+      spGroup.rotation.x = step
+      spGroup.rotation.z = step
+    }
 
-    // render using requestAnimationFrame
     requestAnimationFrame(render);
     renderer.render(scene, camera);
   }
