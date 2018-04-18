@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/josdirksen/learning-threejs-third#readme",
   "dependencies": {
-    "three": "^0.88.0"
+    "three": "^0.91.0"
   },
   "devDependencies": {
     "jslint": "^0.11.0"

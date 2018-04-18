@@ -5,25 +5,22 @@ function init() {
   var renderer = initRenderer();
   var camera = initCamera();
 
-  // position and point the camera to the center of the scene
-  camera.position.x = -30;
-  camera.position.y = 70;
-  camera.position.z = 70;
-  camera.lookAt(new THREE.Vector3(10, 0, 0));
-
   // create a scene, that will hold all our elements such as objects, cameras and lights.
+  // and add some simple default lights
   var scene = new THREE.Scene();
-
-
-  var shape = createMesh(new THREE.ShapeGeometry(drawShape()));
-  // add the sphere to the scene
-  scene.add(shape);
+  initDefaultLighting(scene);
+  var groundPlane = addLargeGroundPlane(scene)
+  groundPlane.position.y = -30;
 
   // call the render function
   var step = 0;
 
   // setup the control gui
   var controls = new function () {
+
+    this.appliedMaterial = applyMeshNormalMaterial
+    this.castShadow = true;
+    this.groundPlaneVisible = true;
 
     this.amount = 2;
     this.bevelThickness = 2;
@@ -34,39 +31,44 @@ function init() {
     this.curveSegments = 12;
     this.steps = 1;
 
-    this.asGeom = function () {
-      // remove the old plane
-      scene.remove(shape);
-      // create a new one
-
-      var options = {
-        amount: controls.amount,
-        bevelThickness: controls.bevelThickness,
-        bevelSize: controls.bevelSize,
-        bevelSegments: controls.bevelSegments,
-        bevelEnabled: controls.bevelEnabled,
-        curveSegments: controls.curveSegments,
-        steps: controls.steps
-      };
-
-      shape = createMesh(new THREE.ExtrudeGeometry(drawShape(), options));
-      // add it to the scene.
-      scene.add(shape);
+    // redraw function, updates the control UI and recreates the geometry.
+    this.redraw = function () {
+      redrawGeometryAndUpdateUI(gui, scene, controls, function() {
+        var options = {
+          amount: controls.amount,
+          bevelThickness: controls.bevelThickness,
+          bevelSize: controls.bevelSize,
+          bevelSegments: controls.bevelSegments,
+          bevelEnabled: controls.bevelEnabled,
+          curveSegments: controls.curveSegments,
+          steps: controls.steps
+        };
+  
+        var geom = new THREE.ExtrudeGeometry(drawShape(), options);
+        geom.applyMatrix(new THREE.Matrix4().makeTranslation(-20, 0, 0));
+        geom.applyMatrix(new THREE.Matrix4().makeScale(0.4,0.4,0.4));
+        return geom
+      });
     };
-
   };
 
   var gui = new dat.GUI();
-  gui.add(controls, 'amount', 0, 20).onChange(controls.asGeom);
-  gui.add(controls, 'bevelThickness', 0, 10).onChange(controls.asGeom);
-  gui.add(controls, 'bevelSize', 0, 10).onChange(controls.asGeom);
-  gui.add(controls, 'bevelSegments', 0, 30).step(1).onChange(controls.asGeom);
-  gui.add(controls, 'bevelEnabled').onChange(controls.asGeom);
-  gui.add(controls, 'curveSegments', 1, 30).step(1).onChange(controls.asGeom);
-  gui.add(controls, 'steps', 1, 5).step(1).onChange(controls.asGeom);
+  gui.add(controls, 'amount', 0, 20).onChange(controls.redraw);
+  gui.add(controls, 'bevelThickness', 0, 10).onChange(controls.redraw);
+  gui.add(controls, 'bevelSize', 0, 10).onChange(controls.redraw);
+  gui.add(controls, 'bevelSegments', 0, 30).step(1).onChange(controls.redraw);
+  gui.add(controls, 'bevelEnabled').onChange(controls.redraw);
+  gui.add(controls, 'curveSegments', 1, 30).step(1).onChange(controls.redraw);
+  gui.add(controls, 'steps', 1, 5).step(1).onChange(controls.redraw);
 
-  controls.asGeom();
-  render();
+  // add a material section, so we can switch between materials
+  gui.add(controls, 'appliedMaterial', {
+    meshNormal: applyMeshNormalMaterial, 
+    meshStandard: applyMeshStandardMaterial
+  }).onChange(controls.redraw)
+  
+  gui.add(controls, 'castShadow').onChange(function(e) {controls.mesh.castShadow = e})
+  gui.add(controls, 'groundPlaneVisible').onChange(function(e) {groundPlane.material.visible = e})
 
   function drawShape() {
 
@@ -111,48 +113,15 @@ function init() {
     return shape;
   }
 
-  function createMesh(geom) {
-
-    geom.applyMatrix(new THREE.Matrix4().makeTranslation(-20, 0, 0));
-
-    // assign two materials
-    var meshMaterial = new THREE.MeshNormalMaterial({
-      shading: THREE.FlatShading,
-      transparent: true,
-      opacity: 0.7
-    });
-
-    //  meshMaterial.side = THREE.DoubleSide;
-    var wireFrameMat = new THREE.MeshBasicMaterial();
-    wireFrameMat.wireframe = true;
-
-    // create a multimaterial
-    var mesh = THREE.SceneUtils.createMultiMaterialObject(geom, [meshMaterial]);
-
-    return mesh;
-  }
-
-  function createLine(shape, spaced) {
-    if (!spaced) {
-      var mesh = new THREE.Line(shape.createPointsGeometry(), new THREE.LineBasicMaterial({
-        color: 0xff3333,
-        linewidth: 2
-      }));
-      return mesh;
-    } else {
-      var mesh = new THREE.Line(shape.createSpacedPointsGeometry(20), new THREE.LineBasicMaterial({
-        color: 0xff3333,
-        linewidth: 2
-      }));
-      return mesh;
-    }
-
-  }
-
+  var step = 0;
+  controls.redraw();
+  render();
+  
   function render() {
     stats.update();
-
-    shape.rotation.y = step += 0.01;
+    controls.mesh.rotation.y = step+=0.005
+    controls.mesh.rotation.x = step
+    controls.mesh.rotation.z = step
 
     // render using requestAnimationFrame
     requestAnimationFrame(render);

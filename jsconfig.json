@@ -1,7 +1,10 @@
 {
     "typeAcquisition": {
         "include": [
-            "three"
         ]
-    }
+    },
+    "include": [
+        "src/**/*",
+        "libs/**/*"
+    ]
 }

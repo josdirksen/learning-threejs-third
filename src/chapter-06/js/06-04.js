@@ -5,18 +5,21 @@ function init() {
   var renderer = initRenderer();
   var camera = initCamera();
   // create a scene, that will hold all our elements such as objects, cameras and lights.
+  // and add some simple default lights
   var scene = new THREE.Scene();
+  initDefaultLighting(scene);
+  var groundPlane = addLargeGroundPlane(scene)
+  groundPlane.position.y = -30;
 
-  // call the render function
   var step = 0;
-
-  // the points group
   var spGroup;
-  // the mesh
-  var tubeMesh;
 
   // setup the control gui
   var controls = new function () {
+
+    this.appliedMaterial = applyMeshNormalMaterial
+    this.castShadow = true;
+    this.groundPlaneVisible = true;
 
     this.numberOfPoints = 5;
     this.segments = 64;
@@ -40,11 +43,18 @@ function init() {
     };
 
     this.redraw = function () {
-      scene.remove(spGroup);
-      scene.remove(tubeMesh);
-      generatePoints(controls.points, controls.segments, controls.radius, controls.radiusSegments,
-        controls.closed);
+      redrawGeometryAndUpdateUI(gui, scene, controls, function() {
+        return generatePoints(controls.points, controls.segments, controls.radius, controls.radiusSegments,
+          controls.closed);
+      });
     };
+
+    // this.redraw = function () {
+    //   scene.remove(spGroup);
+    //   scene.remove(tubeMesh);
+    //   generatePoints(controls.points, controls.segments, controls.radius, controls.radiusSegments,
+    //     controls.closed);
+    // };
 
   };
 
@@ -56,6 +66,14 @@ function init() {
   gui.add(controls, 'radiusSegments', 0, 100).step(1).onChange(controls.redraw);
   gui.add(controls, 'closed').onChange(controls.redraw);
 
+  gui.add(controls, 'appliedMaterial', {
+    meshNormal: applyMeshNormalMaterial, 
+    meshStandard: applyMeshStandardMaterial
+  }).onChange(controls.redraw)
+
+  gui.add(controls, 'castShadow').onChange(function(e) {controls.mesh.castShadow = e})
+  gui.add(controls, 'groundPlaneVisible').onChange(function(e) {groundPlane.material.visible = e})
+
 
   controls.newPoints();
 
@@ -65,7 +83,7 @@ function init() {
   function generatePoints(points, segments, radius, radiusSegments, closed) {
     // add n random spheres
 
-
+    if (spGroup) scene.remove(spGroup)
     spGroup = new THREE.Object3D();
     var material = new THREE.MeshBasicMaterial({
       color: 0xff0000,
@@ -80,42 +98,21 @@ function init() {
     });
     // add the points as a group to the scene
     scene.add(spGroup);
-
-    // use the same points to create a convexgeometry
-
-    // TODO: Somewhere also explain the possible curves
-    var tubeGeometry = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points), segments, radius, radiusSegments,
-      closed);
-    tubeMesh = createMesh(tubeGeometry);
-    scene.add(tubeMesh);
-  }
-
-  function createMesh(geom) {
-
-    // assign two materials
-    //var meshMaterial = new THREE.MeshNormalMaterial();
-    var meshMaterial = new THREE.MeshBasicMaterial({
-      color: 0x00ff00,
-      transparent: true,
-      opacity: 0.2
-    });
-
-    var wireFrameMat = new THREE.MeshBasicMaterial();
-    wireFrameMat.wireframe = true;
-
-    // create a multimaterial
-    var mesh = THREE.SceneUtils.createMultiMaterialObject(geom, [meshMaterial, wireFrameMat]);
-
-    return mesh;
+    return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points), segments, radius, radiusSegments, closed);
   }
 
   function render() {
     stats.update();
+    controls.mesh.rotation.y = step+=0.005
+    controls.mesh.rotation.x = step
+    controls.mesh.rotation.z = step
 
-    spGroup.rotation.y = step;
-    tubeMesh.rotation.y = step += 0.01;
+    if (spGroup) {
+      spGroup.rotation.y = step
+      spGroup.rotation.x = step
+      spGroup.rotation.z = step
+    }
 
-    // render using requestAnimationFrame
     requestAnimationFrame(render);
     renderer.render(scene, camera);
   }

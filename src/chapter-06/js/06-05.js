@@ -3,36 +3,21 @@ function init() {
   // use the defaults
   var stats = initStats();
   var renderer = initRenderer();
-  renderer.setClearColor(0xEEEEEE);
-
   var camera = initCamera();
-  // position and point the camera to the center of the scene
-  camera.position.set(-80, 80, 80);
-  camera.lookAt(new THREE.Vector3(60, -60, 0));
-
-
-  // create a scene, that will hold all our elements such as objects, cameras and lights.
   var scene = new THREE.Scene();
-
-  var shape = createMesh(new THREE.ShapeGeometry(drawShape()));
-  // add the sphere to the scene
-  scene.add(shape);
-
-
-  var spotLight = new THREE.DirectionalLight(0xffffff);
-  spotLight.position = new THREE.Vector3(70, 170, 70);
-  spotLight.intensity = 0.7;
-
-  spotLight.target = shape;
-
-  scene.add(spotLight);
+  initDefaultLighting(scene);
+  var groundPlane = addLargeGroundPlane(scene)
+  groundPlane.position.y = -30;
 
   // call the render function
   var step = 0;
 
-
   // setup the control gui
   var controls = new function () {
+
+    this.appliedMaterial = applyMeshNormalMaterial
+    this.castShadow = true;
+    this.groundPlaneVisible = true;
 
     this.amount = 2;
     this.bevelThickness = 2;
@@ -43,39 +28,48 @@ function init() {
     this.curveSegments = 12;
     this.steps = 1;
 
-    this.asGeom = function () {
-      // remove the old plane
-      scene.remove(shape);
-      // create a new one
+    // redraw function, updates the control UI and recreates the geometry.
+    this.redraw = function () {
+      redrawGeometryAndUpdateUI(gui, scene, controls, function() {
+        var options = {
+          amount: controls.amount,
+          bevelThickness: controls.bevelThickness,
+          bevelSize: controls.bevelSize,
+          bevelSegments: controls.bevelSegments,
+          bevelEnabled: controls.bevelEnabled,
+          curveSegments: controls.curveSegments,
+          steps: controls.steps
+        };
+  
+        var geom = new THREE.ExtrudeGeometry(drawShape(), options)
+        geom.applyMatrix(new THREE.Matrix4().makeScale(0.05,0.05,0.05));
+        geom.center();
 
-      var options = {
-        amount: controls.amount,
-        bevelThickness: controls.bevelThickness,
-        bevelSize: controls.bevelSize,
-        bevelSegments: controls.bevelSegments,
-        bevelEnabled: controls.bevelEnabled,
-        curveSegments: controls.curveSegments,
-        steps: controls.steps
-      };
+        console.log(geom);
 
-      shape = createMesh(new THREE.ExtrudeGeometry(drawShape(), options));
-      // add it to the scene.
-      scene.add(shape);
+        return geom
+      });
     };
-
   };
 
   var gui = new dat.GUI();
-  gui.add(controls, 'amount', 0, 20).onChange(controls.asGeom);
-  gui.add(controls, 'bevelThickness', 0, 10).onChange(controls.asGeom);
-  gui.add(controls, 'bevelSize', 0, 10).onChange(controls.asGeom);
-  gui.add(controls, 'bevelSegments', 0, 30).step(1).onChange(controls.asGeom);
-  gui.add(controls, 'bevelEnabled').onChange(controls.asGeom);
-  gui.add(controls, 'curveSegments', 1, 30).step(1).onChange(controls.asGeom);
-  gui.add(controls, 'steps', 1, 5).step(1).onChange(controls.asGeom);
+  gui.add(controls, 'amount', 0, 20).onChange(controls.redraw);
+  gui.add(controls, 'bevelThickness', 0, 10).onChange(controls.redraw);
+  gui.add(controls, 'bevelSize', 0, 10).onChange(controls.redraw);
+  gui.add(controls, 'bevelSegments', 0, 30).step(1).onChange(controls.redraw);
+  gui.add(controls, 'bevelEnabled').onChange(controls.redraw);
+  gui.add(controls, 'curveSegments', 1, 30).step(1).onChange(controls.redraw);
+  gui.add(controls, 'steps', 1, 5).step(1).onChange(controls.redraw);
 
-  controls.asGeom();
-  render();
+
+  // add a material section, so we can switch between materials
+  gui.add(controls, 'appliedMaterial', {
+    meshNormal: applyMeshNormalMaterial, 
+    meshStandard: applyMeshStandardMaterial
+  }).onChange(controls.redraw)
+  
+  gui.add(controls, 'castShadow').onChange(function(e) {controls.mesh.castShadow = e})
+  gui.add(controls, 'groundPlaneVisible').onChange(function(e) {groundPlane.material.visible = e})
 
   function drawShape() {
 
@@ -87,30 +81,17 @@ function init() {
     return shape;
   }
 
-  function createMesh(geom) {
+  
 
-    geom.applyMatrix(new THREE.Matrix4().makeTranslation(-390, -74, 0));
-
-
-    // assign two materials
-    var meshMaterial = new THREE.MeshStandardMaterial({
-      color: 0x333333,
-      metalness: 0.3
-    });
-    var mesh = new THREE.Mesh(geom, meshMaterial);
-    mesh.scale.x = 0.1;
-    mesh.scale.y = 0.1;
-
-    mesh.rotation.z = Math.PI;
-    mesh.rotation.x = -1.1;
-    return mesh;
-  }
-
-
+  var step = 0;
+  controls.redraw();
+  render();
+  
   function render() {
     stats.update();
-
-    shape.rotation.y = step += 0.005;
+    controls.mesh.rotation.y = step+=0.005
+    controls.mesh.rotation.x = step
+    controls.mesh.rotation.z = step
 
     // render using requestAnimationFrame
     requestAnimationFrame(render);
