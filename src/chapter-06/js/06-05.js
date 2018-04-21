@@ -45,8 +45,6 @@ function init() {
         geom.applyMatrix(new THREE.Matrix4().makeScale(0.05,0.05,0.05));
         geom.center();
 
-        console.log(geom);
-
         return geom
       });
     };
