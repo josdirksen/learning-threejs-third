@@ -49,13 +49,6 @@ function init() {
       });
     };
 
-    // this.redraw = function () {
-    //   scene.remove(spGroup);
-    //   scene.remove(tubeMesh);
-    //   generatePoints(controls.points, controls.segments, controls.radius, controls.radiusSegments,
-    //     controls.closed);
-    // };
-
   };
 
   var gui = new dat.GUI();

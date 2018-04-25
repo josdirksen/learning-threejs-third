@@ -71,11 +71,11 @@ function init() {
     scene.add(spGroup);
 
     // use the same points to create a convexgeometry
-    var hullGeometry = new THREE.ConvexGeometry(points);
-    hullGeometry.computeVertexNormals();
-    hullGeometry.computeFaceNormals();
-    hullGeometry.normalsNeedUpdate = true;
-    return hullGeometry;
+    var convexGeometry = new THREE.ConvexGeometry(points);
+    convexGeometry.computeVertexNormals();
+    convexGeometry.computeFaceNormals();
+    convexGeometry.normalsNeedUpdate = true;
+    return convexGeometry;
   }
 
   function render() {

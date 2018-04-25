@@ -54,7 +54,6 @@ function init() {
 
     if (spGroup) scene.remove(spGroup)
 
-    // add 10 random spheres
     var points = [];
     var height = 5;
     var count = 30;
