@@ -12,14 +12,14 @@ function init() {
     this.transparent = true;
     this.opacity = 0.6;
     this.color = 0xffffff;
-    this.rotateSystem = true;
+    this.rotate = true;
     this.sizeAttenuation = true;
 
     this.redraw = function () {
-      if (scene.getObjectByName("pointcloud")) {
-        scene.remove(scene.getObjectByName("pointcloud"));
+      if (scene.getObjectByName("points")) {
+        scene.remove(scene.getObjectByName("points"));
       }
-      createPointCloud(controls.size, controls.transparent, controls.opacity, controls.sizeAttenuation,
+      createPoints(controls.size, controls.transparent, controls.opacity, controls.sizeAttenuation,
         controls.color);
     };
   };
@@ -30,16 +30,16 @@ function init() {
   gui.add(controls, 'opacity', 0, 1).onChange(controls.redraw);
   gui.addColor(controls, 'color').onChange(controls.redraw);
   gui.add(controls, 'sizeAttenuation').onChange(controls.redraw);
-  gui.add(controls, 'rotateSystem');
+  gui.add(controls, 'rotate');
   controls.redraw();
 
   render();
 
-  function createPointCloud(size, transparent, opacity, sizeAttenuation, color) {
+  function createPoints(size, transparent, opacity, sizeAttenuation, color) {
 
     var geom = new THREE.Geometry();
 
-    var material = new THREE.PointCloudMaterial({
+    var material = new THREE.PointsMaterial({
       size: size,
       transparent: transparent,
       opacity: opacity,
@@ -55,9 +55,8 @@ function init() {
       geom.vertices.push(particle);
     }
 
-    cloud = new THREE.PointCloud(geom, material);
-    cloud.name = 'pointcloud';
-    cloud.sortParticles = true;
+    cloud = new THREE.Points(geom, material);
+    cloud.name = 'points';
     scene.add(cloud);
   }
 
@@ -65,7 +64,7 @@ function init() {
 
   function render() {
     stats.update();
-    if (controls.rotateSystem) {
+    if (controls.rotate) {
       step += 0.01;
       cloud.rotation.x = step;
       cloud.rotation.z = step;

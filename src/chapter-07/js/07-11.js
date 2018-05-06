@@ -21,7 +21,6 @@ function init() {
     this.tubularSegments = 12;
     this.p = 5;
     this.q = 4;
-    this.heightScale = 3.5;
     this.asParticles = false;
     this.rotate = false;
 
@@ -29,12 +28,12 @@ function init() {
       // remove the old plane
       if (knot) scene.remove(knot);
       // create a new one
-      var geom = new THREE.TorusKnotGeometry(controls.radius, controls.tube, Math.round(controls.radialSegments), Math.round(controls.tubularSegments), Math.round(controls.p), Math.round(controls.q), controls.heightScale);
+      var geom = new THREE.TorusKnotGeometry(controls.radius, controls.tube, Math.round(controls.radialSegments), Math.round(controls.tubularSegments), Math.round(controls.p), Math.round(controls.q));
 
       if (controls.asParticles) {
-        knot = createPointCloud(geom);
+        knot = createPoints(geom);
       } else {
-        knot = createMesh(geom);
+        knot = new THREE.Mesh(geom, new THREE.MeshNormalMaterial());
       }
 
       // add it to the scene.
@@ -50,7 +49,6 @@ function init() {
   gui.add(controls, 'tubularSegments', 1, 20).step(1).onChange(controls.redraw);
   gui.add(controls, 'p', 1, 10).step(1).onChange(controls.redraw);
   gui.add(controls, 'q', 1, 15).step(1).onChange(controls.redraw);
-  gui.add(controls, 'heightScale', 0, 5).onChange(controls.redraw);
   gui.add(controls, 'asParticles').onChange(controls.redraw);
   gui.add(controls, 'rotate').onChange(controls.redraw);
 
@@ -81,8 +79,8 @@ function init() {
 
   }
 
-  function createPointCloud(geom) {
-    var material = new THREE.PointCloudMaterial({
+  function createPoints(geom) {
+    var material = new THREE.PointsMaterial({
       color: 0xffffff,
       size: 3,
       transparent: true,
@@ -91,22 +89,10 @@ function init() {
       depthWrite: false // instead of sortParticles
     });
 
-    var cloud = new THREE.PointCloud(geom, material);
-    cloud.sortParticles = true;
+    var cloud = new THREE.Points(geom, material);
     return cloud;
   }
 
-  function createMesh(geom) {
-
-    // assign two materials
-    var meshMaterial = new THREE.MeshNormalMaterial({});
-    meshMaterial.side = THREE.DoubleSide;
-
-    // create a multimaterial
-    var mesh = THREE.SceneUtils.createMultiMaterialObject(geom, [meshMaterial]);
-
-    return mesh;
-  }
 
   function render() {
     stats.update();

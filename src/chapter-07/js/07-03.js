@@ -49,8 +49,7 @@ function init() {
   render();
 
   function createParticles(size, transparent, opacity, vertexColors, sizeAttenuation, colorValue, vertexColorValue) {
-
-
+    
     var geom = new THREE.Geometry();
     var material = new THREE.PointsMaterial({
       size: size,

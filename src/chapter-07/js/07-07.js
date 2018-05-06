@@ -58,7 +58,9 @@ function init() {
       var particle = new THREE.Vector3(
         Math.random() * range - range / 2,
         Math.random() * range * 1.5,
-        Math.random() * range - range / 2);
+        // Math.random() * range - range / 2
+        1 + (i/100)
+      )
       particle.velocityY = 0.1 + Math.random() / 5;
       particle.velocityX = (Math.random() - 0.5) / 3;
       geom.vertices.push(particle);

@@ -63,10 +63,10 @@ function init() {
     // we have 1 row, with five sprites
     spriteMaterial.map.offset = new THREE.Vector2(0.2 * spriteNumber, 0);
     spriteMaterial.map.repeat = new THREE.Vector2(1 / 5, 1);
-    spriteMaterial.depthTest = false;
-
     spriteMaterial.blending = THREE.AdditiveBlending;
-
+    // make sure the object is always rendered at the front
+    spriteMaterial.depthTest = false;
+    
     var sprite = new THREE.Sprite(spriteMaterial);
     sprite.scale.set(size, size, size);
     sprite.position.set(100, 50, -10);
@@ -90,6 +90,7 @@ function init() {
         e.position.x = e.position.x + e.velocityX;
         if (e.position.x > window.innerWidth) {
           e.velocityX = -5;
+          controls.sprite += 1;
           e.material.map.offset.set(1 / 5 * (controls.sprite % 4), 0);
         }
         if (e.position.x < 0) {

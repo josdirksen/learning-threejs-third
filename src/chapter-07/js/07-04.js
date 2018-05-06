@@ -62,8 +62,7 @@ function init() {
 
   function createSprites() {
     var material = new THREE.SpriteCanvasMaterial({
-      program: getTexture,
-      color: 0xffffff
+      program: getTexture
     });
 
     material.rotation = Math.PI;

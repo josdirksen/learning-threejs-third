@@ -25,7 +25,7 @@ function init() {
       toRemove.forEach(function (child) {
         scene.remove(child)
       });
-      createPointClouds(controls.size, controls.transparent, controls.opacity, controls.sizeAttenuation,
+      createPointInstances(controls.size, controls.transparent, controls.opacity, controls.sizeAttenuation,
         controls.color);
     };
   };
@@ -61,7 +61,7 @@ function init() {
     });
 
     var range = 40;
-    for (var i = 0; i < 50; i++) {
+    for (var i = 0; i < 150; i++) {
       var particle = new THREE.Vector3(
         Math.random() * range - range / 2,
         Math.random() * range * 1.5,
@@ -74,18 +74,17 @@ function init() {
 
     var system = new THREE.Points(geom, material);
     system.name = name;
-    system.sortParticles = true;
     return system;
   }
 
-  function createPointClouds(size, transparent, opacity, sizeAttenuation, color) {
+  function createPointInstances(size, transparent, opacity, sizeAttenuation, color) {
 
     var loader = new THREE.TextureLoader();
 
-    var texture1 = loader.load("../../assets/textures/particles/snowflake1.png");
-    var texture2 = loader.load("../../assets/textures/particles/snowflake2.png");
-    var texture3 = loader.load("../../assets/textures/particles/snowflake3.png");
-    var texture4 = loader.load("../../assets/textures/particles/snowflake5.png");
+    var texture1 = loader.load("../../assets/textures/particles/snowflake1_t.png");
+    var texture2 = loader.load("../../assets/textures/particles/snowflake2_t.png");
+    var texture3 = loader.load("../../assets/textures/particles/snowflake3_t.png");
+    var texture4 = loader.load("../../assets/textures/particles/snowflake5_t.png");
 
     scene.add(createPointCloud("system1", texture1, size, transparent, opacity, sizeAttenuation, color));
     scene.add(createPointCloud("system2", texture2, size, transparent, opacity, sizeAttenuation, color));

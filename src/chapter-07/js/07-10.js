@@ -12,8 +12,12 @@ function init() {
 
   var group;
 
-  function createSprites() {
+  function getTexture() {
+    var texture = new THREE.TextureLoader().load("../../assets/textures/particles/sprite-sheet.png");
+    return texture;
+  }
 
+  function createSprites() {
     group = new THREE.Object3D();
     var range = 200;
     for (var i = 0; i < 400; i++) {
@@ -22,15 +26,7 @@ function init() {
     scene.add(group);
   }
 
-
-  function getTexture() {
-    var texture = new THREE.TextureLoader().load("../../assets/textures/particles/sprite-sheet.png");
-    return texture;
-  }
-
-
   function createSprite(size, transparent, opacity, color, spriteNumber, range) {
-
 
     var spriteMaterial = new THREE.SpriteMaterial({
       opacity: opacity,
@@ -48,22 +44,20 @@ function init() {
 
     var sprite = new THREE.Sprite(spriteMaterial);
     sprite.scale.set(size, size, size);
-    sprite.position.set(Math.random() * range - range / 2, Math.random() * range - range / 2, Math.random() *
-      range - range / 2);
-    sprite.velocityX = 5;
-
+    sprite.position.set(
+      Math.random() * range - range / 2,
+      Math.random() * range - range / 2,
+      Math.random() * range - range / 2);
 
     return sprite;
   }
 
 
-  var step = 0;
 
   function render() {
 
     stats.update();
-    step += 0.01;
-    group.rotation.x = step;
+    group.rotation.x +=0.01;
 
     requestAnimationFrame(render);
     webGLRenderer.render(scene, camera);
