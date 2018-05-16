@@ -48,7 +48,19 @@ THREE.STLLoader.prototype = {
 		loader.setResponseType( 'arraybuffer' );
 		loader.load( url, function ( text ) {
 
-			onLoad( scope.parse( text ) );
+			try {
+
+				onLoad( scope.parse( text ) );
+
+			} catch ( exception ) {
+
+				if ( onError ) {
+
+					onError( exception );
+
+				}
+
+			}
 
 		}, onProgress, onError );
 
@@ -200,7 +212,7 @@ THREE.STLLoader.prototype = {
 			var patternFace = /facet([\s\S]*?)endfacet/g;
 			var faceCounter = 0;
 
-			var patternFloat = /[\s]+([+-]?(?:\d+.\d+|\d+.|\d+|.\d+)(?:[eE][+-]?\d+)?)/.source;
+			var patternFloat = /[\s]+([+-]?(?:\d*)(?:\.\d*)?(?:[eE][+-]?\d+)?)/.source;
 			var patternVertex = new RegExp( 'vertex' + patternFloat + patternFloat + patternFloat, 'g' );
 			var patternNormal = new RegExp( 'normal' + patternFloat + patternFloat + patternFloat, 'g' );
 
@@ -266,29 +278,11 @@ THREE.STLLoader.prototype = {
 
 			if ( typeof buffer !== 'string' ) {
 
-				var array_buffer = new Uint8Array( buffer );
-
-				if ( window.TextDecoder !== undefined ) {
-
-					return new TextDecoder().decode( array_buffer );
-
-				}
-
-				var str = '';
-
-				for ( var i = 0, il = buffer.byteLength; i < il; i ++ ) {
-
-					str += String.fromCharCode( array_buffer[ i ] ); // implicitly assumes little-endian
-
-				}
-
-				return str;
-
-			} else {
-
-				return buffer;
+				return THREE.LoaderUtils.decodeText( new Uint8Array( buffer ) );
 
 			}
+
+			return buffer;
 
 		}
 
