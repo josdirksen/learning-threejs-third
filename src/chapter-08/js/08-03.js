@@ -4,7 +4,7 @@ function init() {
   var stats = initStats();
   var webGLRenderer = initRenderer();
   var scene = new THREE.Scene();
-  var camera = initCamera(new THREE.Vector3(-30, 40, 50));
+  var camera = initCamera(new THREE.Vector3(0, 40, 50));
 
   var knot = createMesh(new THREE.TorusKnotGeometry(10, 1, 64, 8, 2, 3));
   // add the sphere to the scene
@@ -53,7 +53,7 @@ function init() {
         var loader = new THREE.ObjectLoader();
 
         loadedMesh = loader.parse(loadedGeometry);
-        loadedMesh.position.x -= 50;
+        loadedMesh.position.x -= 40;
         scene.add(loadedMesh);
       }
     }
@@ -88,6 +88,7 @@ function init() {
 
     // create a multimaterial
     var mesh = new THREE.Mesh(geom, meshMaterial);
+    mesh.position.set(20, 0, 0)
 
     return mesh;
   }

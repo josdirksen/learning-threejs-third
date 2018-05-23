@@ -5,22 +5,8 @@ function init() {
   var webGLRenderer = initRenderer();
   var scene = new THREE.Scene();
   var camera = initCamera(new THREE.Vector3(30, 30, 30));
-
-  var ground = new THREE.PlaneGeometry(100, 100, 50, 50);
-
-  var groundMesh = THREE.SceneUtils.createMultiMaterialObject(ground, [new THREE.MeshBasicMaterial({
-      wireframe: true,
-      overdraw: true,
-      color: 000000
-    }),
-    new THREE.MeshBasicMaterial({
-      color: 0x00ff00,
-      transparent: true,
-      opacity: 0.5
-    })
-  ]);
-  groundMesh.rotation.x = -0.5 * Math.PI;
-  scene.add(groundMesh);
+  initDefaultLighting(scene);
+  var groundPlane = addLargeGroundPlane(scene)
 
   // call the render function
   var step = 0.03;
@@ -29,6 +15,7 @@ function init() {
   var cube;
   var group;
   var bboxMesh;
+  var arrow;
 
   // setup the control gui
   var controls = new function () {
@@ -55,8 +42,6 @@ function init() {
 
     this.redraw = function () {
       // remove the old plane
-      //scene.remove(sphere);
-      //scene.remove(cube);
       scene.remove(group);
 
       // create a new one
@@ -64,21 +49,23 @@ function init() {
       cube = createMesh(new THREE.BoxGeometry(6, 6, 6));
 
       sphere.position.set(controls.spherePosX, controls.spherePosY, controls.spherePosZ);
+      sphere.scale.set(controls.sphereScale, controls.sphereScale, controls.sphereScale);
       cube.position.set(controls.cubePosX, controls.cubePosY, controls.cubePosZ);
-      // add it to the scene.
+      cube.scale.set(controls.cubeScale, controls.cubeScale, controls.cubeScale);
 
       // also create a group, only used for rotating
       group = new THREE.Group();
+      group.position.set(controls.groupPosX, controls.groupPosY, controls.groupPosZ);
+      group.scale.set(controls.groupScale, controls.groupScale, controls.groupScale);
       group.add(sphere);
       group.add(cube);
 
       scene.add(group);
       controls.positionBoundingBox();
 
-      var arrow = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), group.position, 10, 0x0000ff);
+      if (arrow) scene.remove(arrow)
+      arrow = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), group.position, 10, 0x0000ff);
       scene.add(arrow);
-
-
     };
 
     this.positionBoundingBox = function () {
@@ -95,7 +82,8 @@ function init() {
         wireframeLinewidth: 2,
         wireframe: true
       }));
-      //            scene.add(bboxMesh);
+
+      // scene.add(bboxMesh);
 
       bboxMesh.position.x = ((box.min.x + box.max.x) / 2);
       bboxMesh.position.y = ((box.min.y + box.max.y) / 2);
@@ -108,54 +96,66 @@ function init() {
   sphereFolder.add(controls, "spherePosX", -20, 20).onChange(function (e) {
     sphere.position.x = e;
     controls.positionBoundingBox()
+    controls.redraw();
   });
   sphereFolder.add(controls, "spherePosZ", -20, 20).onChange(function (e) {
     sphere.position.z = e;
-    controls.positionBoundingBox()
+    controls.positionBoundingBox();
+    controls.redraw();
   });
   sphereFolder.add(controls, "spherePosY", -20, 20).onChange(function (e) {
     sphere.position.y = e;
-    controls.positionBoundingBox()
+    controls.positionBoundingBox();
+    controls.redraw();
   });
   sphereFolder.add(controls, "sphereScale", 0, 3).onChange(function (e) {
     sphere.scale.set(e, e, e);
-    controls.positionBoundingBox()
+    controls.positionBoundingBox();
+    controls.redraw();
   });
 
   var cubeFolder = gui.addFolder("cube");
   cubeFolder.add(controls, "cubePosX", -20, 20).onChange(function (e) {
     cube.position.x = e;
-    controls.positionBoundingBox()
+    controls.positionBoundingBox();
+    controls.redraw();
   });
   cubeFolder.add(controls, "cubePosZ", -20, 20).onChange(function (e) {
     cube.position.z = e;
-    controls.positionBoundingBox()
+    controls.positionBoundingBox();
+    controls.redraw();
   });
   cubeFolder.add(controls, "cubePosY", -20, 20).onChange(function (e) {
     cube.position.y = e;
-    controls.positionBoundingBox()
+    controls.positionBoundingBox();
+    controls.redraw();
   });
   cubeFolder.add(controls, "cubeScale", 0, 3).onChange(function (e) {
     cube.scale.set(e, e, e);
-    controls.positionBoundingBox()
+    controls.positionBoundingBox();
+    controls.redraw();
   });
 
   var cubeFolder = gui.addFolder("group");
   cubeFolder.add(controls, "groupPosX", -20, 20).onChange(function (e) {
     group.position.x = e;
-    controls.positionBoundingBox()
+    controls.positionBoundingBox();
+    controls.redraw();
   });
   cubeFolder.add(controls, "groupPosZ", -20, 20).onChange(function (e) {
     group.position.z = e;
-    controls.positionBoundingBox()
+    controls.positionBoundingBox();
+    controls.redraw();
   });
   cubeFolder.add(controls, "groupPosY", -20, 20).onChange(function (e) {
     group.position.y = e;
-    controls.positionBoundingBox()
+    controls.positionBoundingBox();
+    controls.redraw();
   });
   cubeFolder.add(controls, "groupScale", 0, 3).onChange(function (e) {
     group.scale.set(e, e, e);
-    controls.positionBoundingBox()
+    controls.positionBoundingBox();
+    controls.redraw();
   });
 
   gui.add(controls, "grouping");
@@ -168,11 +168,9 @@ function init() {
     // assign two materials
     var meshMaterial = new THREE.MeshNormalMaterial();
     meshMaterial.side = THREE.DoubleSide;
-    var wireFrameMat = new THREE.MeshBasicMaterial();
-    wireFrameMat.wireframe = true;
 
     // create a multimaterial
-    var plane = THREE.SceneUtils.createMultiMaterialObject(geom, [meshMaterial, wireFrameMat]);
+    var plane = new THREE.Mesh(geom, meshMaterial);
 
     return plane;
   }
