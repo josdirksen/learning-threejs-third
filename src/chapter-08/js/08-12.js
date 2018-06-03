@@ -1,20 +1,21 @@
 function init() {
 
   // setup the scene for rendering
-  var loaderScene = new BaseLoaderScene();
   var camera = initCamera(new THREE.Vector3(10, 10, 10));
+  var loaderScene = new BaseLoaderScene(camera);
   camera.lookAt(new THREE.Vector3(0, 0, 0));
 
   var loader = new THREE.PDBLoader();
 
   // also possible to use diamond.pdb
-  loader.load("../../assets/models/molecules/aspirin.pdb", function (geometries) {
+  // loader.load("../../assets/models/molecules/aspirin.pdb", function (geometries) {
+  loader.load("../../assets/models/molecules/diamond.pdb", function (geometries) {
 
     var group = new THREE.Object3D();
 
     // create the atoms
     var geometryAtoms = geometries.geometryAtoms;
-    var sphere = new THREE.SphereGeometry(0.2);
+    
     for (i = 0; i < geometryAtoms.attributes.position.count; i++) {
       var startPosition = new THREE.Vector3();
       startPosition.x = geometryAtoms.attributes.position.getX(i);
@@ -30,6 +31,7 @@ function init() {
         color: color
       });
 
+      var sphere = new THREE.SphereGeometry(0.2);
       var mesh = new THREE.Mesh(sphere, material);
       mesh.position.copy(startPosition);
       group.add(mesh);

@@ -3,7 +3,7 @@
  * demonstrate the different loaders. This create a scene, three
  * lights, and slowly rotates the model, around the z-axis
  */
-function BaseLoaderScene(providedCamera) {
+function BaseLoaderScene(providedCamera, shouldAddLights, shouldRotate, updateMesh) {
 
   self = this;
 
@@ -12,6 +12,9 @@ function BaseLoaderScene(providedCamera) {
   this.stats = initStats();
   this.clock = new THREE.Clock();
   this.camera = providedCamera;
+  this.withLights = (shouldAddLights !== undefined) ? shouldAddLights : true;
+  this.shouldRotate = (shouldRotate !== undefined) ? shouldRotate : true;
+  this.updateMesh = updateMesh
 
   // initialize basic renderer
   this.renderer = initRenderer({
@@ -40,7 +43,13 @@ function BaseLoaderScene(providedCamera) {
     self.stats.update();
     requestAnimationFrame(self._render);
     self.trackballControls.update(self.clock.getDelta());
-    self.mesh.rotation.z += 0.01
+
+    if (updateMesh) this.updateMesh(self.mesh)
+
+    if (shouldRotate) {
+      self.mesh.rotation.z += 0.01
+    }
+
     self.renderer.render(self.scene, self.camera);
   }
 
@@ -71,6 +80,6 @@ function BaseLoaderScene(providedCamera) {
   }
 
   // add the lights
-  this._addLights();
+  if (this.withLights) this._addLights();
 
 }

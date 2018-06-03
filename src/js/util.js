@@ -17,7 +17,7 @@ function initStats(type) {
 
 /**
  * Initialize a simple default renderer and binds it to the "webgl-output" dom
- * element.
+* element.
  * 
  * @param additionalProperties Additional properties to pass into the renderer
  */

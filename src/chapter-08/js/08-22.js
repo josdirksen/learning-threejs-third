@@ -16,7 +16,8 @@ function init() {
     geometry.computeBoundingBox();
 
     var mesh = new THREE.Mesh(geometry, new THREE.MeshNormalMaterial());
-    mesh.scale(100, 100, 100)
+
+    mesh.scale.set(150, 150, 150)
     loaderScene.render(mesh, camera);
   });
 

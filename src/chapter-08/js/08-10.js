@@ -1,8 +1,8 @@
 function init() {
 
   // setup the scene for rendering
-  var loaderScene = new BaseLoaderScene();
   var camera = initCamera(new THREE.Vector3(50, 50, 50));
+  var loaderScene = new BaseLoaderScene(camera);
   camera.lookAt(new THREE.Vector3(0, 0, 0));
 
   // load and render the model
