@@ -17,7 +17,6 @@ function init() {
   var loader = new THREE.OBJLoader();
   loader.load("../../assets/models/city/city.obj", function (object) {
 
-    console.log(object)
     var scale = chroma.scale(['red', 'green', 'blue']);
     setRandomColors(object, scale);
     mesh = object ;
