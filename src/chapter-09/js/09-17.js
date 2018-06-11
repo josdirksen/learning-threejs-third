@@ -22,9 +22,6 @@ function init() {
   var loader = new THREE.BVHLoader();
   loader.load('../../assets/models/amelia-dance/DanceNightClub7_t1.bvh', function (result, mat) {
 
-      // geometry.computeVertexNormals();
-      // geometry.computeMorphNormals();
-
       skeletonHelper = new THREE.SkeletonHelper( result.skeleton.bones[ 0 ] );
       skeletonHelper.skeleton = result.skeleton; // allow animation mixer to bind to SkeletonHelper directly
       var boneContainer = new THREE.Object3D();

@@ -5,12 +5,11 @@ function init() {
   var scene = new THREE.Scene();
   scene.add(new THREE.AmbientLight(0x333333));
   
-  camera.position.set(0, 10, 70);
+  camera.position.set(0, 70, 100);
   var trackballControls = initTrackballControls(camera, renderer);
   var clock = new THREE.Clock();
 
   var mixer = new THREE.AnimationMixer();
-  var sceneContainer = new THREE.Scene();
   var clipAction
   var animationClip
   var mesh
@@ -22,27 +21,24 @@ function init() {
   }
   
   initDefaultLighting(scene);
+  var loader = new THREE.ColladaLoader();
+  loader.load('../../assets/models/monster/monster.dae', function (result) {
 
-  var loader = new THREE.SEA3D({
-    container: sceneContainer
-  });
-  loader.load('../../assets/models/mascot/mascot.sea');
-  loader.onComplete = function( e ) {
-    var skinnedMesh = sceneContainer.children[0];
-    skinnedMesh.scale.set(0.1, 0.1, 0.1);
-    skinnedMesh.translateX(-40);
-    skinnedMesh.translateY(-20);
-    skinnedMesh.rotateY(-0.2*Math.PI);
-    scene.add(skinnedMesh);
+    scene.add(result.scene);
+    result.scene.rotateZ(-0.2*Math.PI)
+    result.scene.translateX(-20)
+    result.scene.translateY(-20)
 
-    // and set up the animation
-    mixer = new THREE.AnimationMixer( skinnedMesh );
-    animationClip = skinnedMesh.animations[0].clip;
+    // setup the mixer
+    mixer = new THREE.AnimationMixer(result.scene);
+    animationClip = result.animations[0];
     clipAction = mixer.clipAction( animationClip ).play();    
     animationClip = clipAction.getClip();
+
+    // // add the animation controls
     enableControls();
-  };
-    
+  });
+
   function enableControls() {
     var gui = new dat.GUI();
     var mixerFolder = gui.addFolder("AnimationMixer")
