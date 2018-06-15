@@ -75,6 +75,8 @@ function initDefaultLighting(scene, initialPosition) {
     spotLight.shadow.mapSize.height = 2048;
     spotLight.shadow.camera.fov = 15;
     spotLight.castShadow = true;
+    spotLight.decay = 2;
+    spotLight.penumbra = 0.05;
 
     scene.add(spotLight);
 
@@ -396,12 +398,15 @@ function createGhostTexture() {
  * @param controls the current controls object
  * @param material the material to control
  * @param geometry the geometry we're working with
+ * @param name optionally the name to assign to the folder
  */
-function addBasicMaterialSettings(gui, controls, material) {
+function addBasicMaterialSettings(gui, controls, material, name) {
+
+    var folderName = (name !== undefined) ? name : 'THREE.Material';
 
     controls.material = material;
 
-    var folder = gui.addFolder('THREE.Material');
+    var folder = gui.addFolder(folderName);
     folder.add(controls.material, 'id');
     folder.add(controls.material, 'uuid');
     folder.add(controls.material, 'name');
@@ -429,10 +434,11 @@ function addBasicMaterialSettings(gui, controls, material) {
     return folder;
 }
 
-function addSpecificMaterialSettings(gui, controls, material) {
+function addSpecificMaterialSettings(gui, controls, material, name) {
     controls.material = material;
     
-    var folder = gui.addFolder('THREE.' + material.type);
+    var folderName = (name !== undefined) ? name : 'THREE.' + material.type;
+    var folder = gui.addFolder(folderName);
     switch (material.type) {
         case "MeshNormalMaterial":
             folder.add(controls.material,'wireframe');
