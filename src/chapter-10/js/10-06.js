@@ -18,39 +18,45 @@ function init() {
   var gui = new dat.GUI();
   var controls = {};
 
-  var ktxTextureLoader = new THREE.KTXLoader();
-  var texture
-
-  switch (determineFormat()) {
-      case "astc": 
-      texture = ktxTextureLoader.load('../../assets/textures/ktx/disturb_ASTC4x4.ktx');
-      break;
-    
-      case "etc1": 
-      texture = ktxTextureLoader.load('../../assets/textures/ktx/disturb_ETC1.ktx');
-      break;
-    
-      case "s3tc": 
-      texture = ktxTextureLoader.load('../../assets/textures/ktx/disturb_BC1.ktx');
-      break;
-    
-      case "pvrtc": 
-      texture = ktxTextureLoader.load('../../assets/textures/ktx/disturb_PVR2bpp.ktx');
-      break;
-  }
-
-
+  var exrTextureLoader = new THREE.EXRLoader();
+  
   // add a simple plane to show the texture
-  var knot = new THREE.TorusKnotGeometry(7, 3)
-  var knotMesh = addGeometry(scene, knot, 'plane', texture, gui, controls);
-  knotMesh.material.side = THREE.DoubleSide;
+  var plane = new THREE.PlaneGeometry(20, 20)
+  var planeMesh = addGeometry(scene, plane, 'plane', exrTextureLoader.load('../../assets/textures/exr/Rec709.exr'), gui, controls);
+  planeMesh.material.side = THREE.DoubleSide;
 
-  function determineFormat() {
+  // we add the webgl folder. When the tonemapping changes, we need
+  // to update the material.
+  addWebglFolder(gui, renderer, function() {
+    planeMesh.material.needsUpdate = true;
+  });
 
-    if ( renderer.extensions.get( 'WEBGL_compressed_texture_astc' ) !== null) return "astc";
-    if ( renderer.extensions.get( 'WEBGL_compressed_texture_etc1' ) !== null) return "etc1";
-    if ( renderer.extensions.get( 'WEBGL_compressed_texture_s3tc' ) !== null) return "s3tc";
-    if ( renderer.extensions.get( 'WEBGL_compressed_texture_pvrtc' ) !== null) return "pvrtc";
+  /**
+   * Adds the folder to the menu to control some tonemapping settings
+   * 
+   * @param {*} gui 
+   * @param {*} renderer 
+   * @param {*} onToneMappingChange 
+   */
+  function addWebglFolder(gui, renderer, onToneMappingChange) {
+
+    var folder = gui.addFolder("WebGL Renderer");
+    var controls = {
+      toneMapping: renderer.toneMapping
+    }
+    folder.add(renderer, "toneMappingExposure", 0, 2, 0.1);
+    folder.add(renderer, "toneMappingWhitePoint", 0, 2, 0.1);
+    folder.add(controls, "toneMapping", {
+      "NoToneMapping" : THREE.NoToneMapping,
+      "LinearToneMapping" : THREE.LinearToneMapping,
+      "ReinhardToneMapping" : THREE.ReinhardToneMapping,
+      "Uncharted2ToneMapping" : THREE.Uncharted2ToneMapping,
+      "Uncharted2ToneMapping" : THREE.Uncharted2ToneMapping,
+      "CineonToneMapping" : THREE.CineonToneMapping
+    }).onChange(function(tm) {
+      renderer.toneMapping = parseInt(tm)
+      onToneMappingChange();
+    });
   }
 
   render();
@@ -59,7 +65,5 @@ function init() {
     trackballControls.update(clock.getDelta());
     requestAnimationFrame(render);
     renderer.render(scene, camera);
-    knotMesh.rotation.x+=0.01
-    knotMesh.rotation.y+=0.01
   }
 }

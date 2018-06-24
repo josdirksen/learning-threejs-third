@@ -14,3 +14,14 @@ function addGeometry(scene, geom, name, texture, gui, controls) {
 
   return mesh;
 };
+
+function addGeometryWithMaterial(scene, geom, name, gui, controls, material) {
+  var mesh = new THREE.Mesh(geom, material);
+  mesh.castShadow = true;
+  
+  scene.add(mesh);
+  addBasicMaterialSettings(gui, controls, material, name + '-THREE.Material');
+  addSpecificMaterialSettings(gui, controls, material, name + '-Material');
+
+  return mesh;
+};

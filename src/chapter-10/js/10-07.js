@@ -18,8 +18,8 @@ function init() {
   var gui = new dat.GUI();
   var controls = {};
 
-  var hdrTextureLoader = new THREE.RGBELoader();
   // images from: http://www.anyhere.com/gward/hdrenc/pages/originals.html
+  var hdrTextureLoader = new THREE.RGBELoader();
   hdrTextureLoader.load('../../assets/textures/hdr/dani_cathedral_oBBC.hdr', function(texture, metadata) {
     texture.encoding = THREE.RGBEEncoding;
     texture.flipY = true;

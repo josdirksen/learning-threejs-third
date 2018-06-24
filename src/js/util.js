@@ -77,11 +77,14 @@ function initDefaultLighting(scene, initialPosition) {
     spotLight.castShadow = true;
     spotLight.decay = 2;
     spotLight.penumbra = 0.05;
+    spotLight.name = "spotLight"
 
     scene.add(spotLight);
 
     var ambientLight = new THREE.AmbientLight(0x343434);
+    ambientLight.name = "ambientLight";
     scene.add(ambientLight);
+    
 }
 
 /**
@@ -211,12 +214,22 @@ function addGroundPlane(scene) {
  * 
  * @param {THREE.Scene} scene 
  */
-function addLargeGroundPlane(scene) {
+function addLargeGroundPlane(scene, useTexture) {
+
+    var withTexture = (useTexture !== undefined) ? useTexture : false;
+
     // create the ground plane
     var planeGeometry = new THREE.PlaneGeometry(10000, 10000);
     var planeMaterial = new THREE.MeshPhongMaterial({
         color: 0xffffff
     });
+    if (withTexture) {
+        var textureLoader = new THREE.TextureLoader();
+        planeMaterial.map = textureLoader.load("../../assets/textures/general/floor-wood.jpg");
+        planeMaterial.map.wrapS = THREE.RepeatWrapping; 
+        planeMaterial.map.wrapT = THREE.RepeatWrapping; 
+        planeMaterial.map.repeat.set(80,80)
+    }
     var plane = new THREE.Mesh(planeGeometry, planeMaterial);
     plane.receiveShadow = true;
 
@@ -443,6 +456,14 @@ function addSpecificMaterialSettings(gui, controls, material, name) {
         case "MeshNormalMaterial":
             folder.add(controls.material,'wireframe');
             return folder;
+
+        case "MeshPhongMaterial":
+            controls.specular = material.specular.getStyle();
+            folder.addColor(controls, 'specular').onChange(function (e) {
+                material.specular.setStyle(e)
+            });
+            folder.add(material, 'shininess', 0, 100, 0.01);
+            return folder;            
             
         case "MeshStandardMaterial":
             controls.color = material.color.getStyle();
