@@ -87,6 +87,28 @@ function initDefaultLighting(scene, initialPosition) {
     
 }
 
+function initDefaultDirectionalLighting(scene, initialPosition) {
+    var position = (initialPosition !== undefined) ? initialPosition : new THREE.Vector3(100, 200, 200);
+    
+    var dirLight = new THREE.DirectionalLight(0xffffff);
+    dirLight.position.copy(position);
+    dirLight.shadow.mapSize.width = 2048;
+    dirLight.shadow.mapSize.height = 2048;
+    dirLight.castShadow = true;
+
+    dirLight.shadow.camera.left = -200;
+    dirLight.shadow.camera.right = 200;
+    dirLight.shadow.camera.top = 200;
+    dirLight.shadow.camera.bottom = -200;
+
+    scene.add(dirLight);
+
+    var ambientLight = new THREE.AmbientLight(0x343434);
+    ambientLight.name = "ambientLight";
+    scene.add(ambientLight);
+    
+}
+
 /**
  * Initialize trackball controls to control the scene
  * 
