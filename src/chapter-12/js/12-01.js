@@ -17,33 +17,40 @@ function init() {
   // setup controls
   var colors = [0x66ff00, 0x6600ff ];
   var gui = new dat.GUI();
-  var controls = {};
+  var controls = {
+    gravityX: 0,
+    gravityY: -50,
+    gravityZ: 0
+  };
+
+  gui.add(controls, "gravityX", -100, 100, 1).onChange(function(e) {scene.setGravity(new THREE.Vector3(controls.gravityX, controls.gravityY, controls.gravityZ))});
+  gui.add(controls, "gravityY", -100, 100, 1).onChange(function(e) {scene.setGravity(new THREE.Vector3(controls.gravityX, controls.gravityY, controls.gravityZ))});
+  gui.add(controls, "gravityZ", -100, 100, 1).onChange(function(e) {scene.setGravity(new THREE.Vector3(controls.gravityX, controls.gravityY, controls.gravityZ))});
 
   scene.setGravity(new THREE.Vector3(0, -50, 0));
-  createGround(scene);
+  createGroundAndWalls(scene);
   var points = getPoints();
   var stones = [];
 
   points.forEach(function (point, index) {
     var stoneGeom = new THREE.BoxGeometry(0.6, 6, 2);
-    var stone = new Physijs.BoxMesh(stoneGeom, Physijs.createMaterial(new THREE.MeshStandardMaterial(
-            {
-                color: colors[index % colors.length],
-                transparent: true,
-                opacity: 0.8
+    var stone = new Physijs.BoxMesh(stoneGeom, Physijs.createMaterial(new THREE.MeshStandardMaterial({
+      color: colors[index % colors.length], transparent: true, opacity: 0.8
+    })));
 
-            })));
     stone.position.copy(point);
     stone.lookAt(scene.position);
-    stone.__dirtyRotation = true;
+    
     stone.position.y = 3.5;
     stone.castShadow = true;
     stone.receiveShadow = true;
 
+    stone.__dirtyRotation = true;
     scene.add(stone);
     stones.push(stone);
 });
 
+// set the initial rotiation of a stone so it'll fall down
 stones[0].rotation.x = 0.4;
 stones[0].__dirtyRotation = true;
 
@@ -82,7 +89,7 @@ function getPoints() {
   return points;
 }
 
-function createGround(scene) {
+function createGroundAndWalls(scene) {
   var textureLoader = new THREE.TextureLoader();
   var ground_material = Physijs.createMaterial(
           new THREE.MeshStandardMaterial(
@@ -125,8 +132,6 @@ function createGround(scene) {
   borderTop.receiveShadow = true;
 
   ground.add(borderTop);
-
-
 
   scene.add(ground);
 }

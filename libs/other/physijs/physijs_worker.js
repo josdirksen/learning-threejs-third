@@ -1342,22 +1342,33 @@ reportConstraints = function() {
 
 	for ( index in _constraints ) {
 		if ( _constraints.hasOwnProperty( index ) ) {
-			constraint = _constraints[index];
-			offset_body = constraint.getRigidBodyA();
-			if (constraint.getFrameOffsetA) {
-				transform = constraint.getFrameOffsetA();
-				origin = transform.getOrigin();
-			}
+				constraint = _constraints[index];
+				offset_body = constraint.getRigidBodyA();
+				if (constraint.getFrameOffsetA) {
+						transform = constraint.getFrameOffsetA();
+						origin = transform.getOrigin();
 
-			// add values to report
-			offset = 1 + (i++) * CONSTRAINTREPORT_ITEMSIZE;
+						// add values to report
+						offset = 1 + (i++) * CONSTRAINTREPORT_ITEMSIZE;
 
-			constraintreport[ offset ] = index;
-			constraintreport[ offset + 1 ] = offset_body.id;
-			constraintreport[ offset + 2 ] = origin.getX();
-			constraintreport[ offset + 3 ] = origin.getY();
-			constraintreport[ offset + 4 ] = origin.getZ();
-			constraintreport[ offset + 5 ] = constraint.getAppliedImpulse();
+						constraintreport[ offset ] = index;
+						constraintreport[ offset + 1 ] = offset_body.id;
+						constraintreport[ offset + 2 ] = origin.getX();
+						constraintreport[ offset + 3 ] = origin.getY();
+						constraintreport[ offset + 4 ] = origin.getZ();
+						constraintreport[ offset + 5 ] = constraint.getAppliedImpulse();
+				} else {
+						// add values to report
+						offset = 1 + (i++) * CONSTRAINTREPORT_ITEMSIZE;
+
+						constraintreport[ offset ] = index;
+						constraintreport[ offset + 1 ] = offset_body.id;
+						constraintreport[ offset + 2 ] = 0;
+						constraintreport[ offset + 3 ] = 0;
+						constraintreport[ offset + 4 ] = 0;
+						constraintreport[ offset + 5 ] = constraint.getAppliedImpulse();
+				}
+
 		}
 	}
 
