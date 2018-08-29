@@ -28,10 +28,10 @@ function init() {
   scene.add(pointLight);
 
   var helper = new THREE.PointLightHelper(pointLight);
-  scene.add(helper);
+  // scene.add(helper);
 
   var shadowHelper = new THREE.CameraHelper(pointLight.shadow.camera)
-  scene.add(shadowHelper)
+  // scene.add(shadowHelper)
 
 
 
