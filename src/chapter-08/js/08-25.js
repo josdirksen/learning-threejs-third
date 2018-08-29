@@ -8,9 +8,8 @@ function init() {
   var loader = new THREE.NRRDLoader();
 
   // you can use slicer to convert the model
-  loader.load("../../assets/I.nrrd", function (volume) {
+  loader.load("../../assets/models/nrrd/I.nrrd", function (volume) {
     var indexZ = 0;
-    console.log(volume)
     sliceZ = volume.extractSlice('z',Math.floor(volume.RASDimensions[2]/4));
     // sliceZ = volume.extractSlice('z',1);
     // scene.add( sliceZ.mesh );

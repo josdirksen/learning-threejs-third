@@ -152,15 +152,15 @@ function init() {
   var textureFlare3 = THREE.ImageUtils.loadTexture("../../assets/textures/flares/lensflare3.png");
 
   var flareColor = new THREE.Color(0xffaacc);
-  var lensFlare = new THREE.LensFlare(textureFlare0, 350, 0.0, THREE.AdditiveBlending, flareColor);
 
-  lensFlare.add(textureFlare3, 60, 0.6, THREE.AdditiveBlending);
-  lensFlare.add(textureFlare3, 70, 0.7, THREE.AdditiveBlending);
-  lensFlare.add(textureFlare3, 120, 0.9, THREE.AdditiveBlending);
-  lensFlare.add(textureFlare3, 70, 1.0, THREE.AdditiveBlending);
+  var lensFlare = new THREE.Lensflare();
 
-  lensFlare.position.copy(spotLight.position);
-  scene.add(lensFlare);
+  lensFlare.addElement(new THREE.LensflareElement(textureFlare0, 350, 0.0, flareColor));
+  lensFlare.addElement(new THREE.LensflareElement(textureFlare3, 60, 0.6, flareColor));
+  lensFlare.addElement(new THREE.LensflareElement(textureFlare3, 70, 0.7, flareColor));
+  lensFlare.addElement(new THREE.LensflareElement(textureFlare3, 120, 0.9, flareColor));
+  lensFlare.addElement(new THREE.LensflareElement(textureFlare3, 70, 1.0, flareColor));
+  spotLight.add(lensFlare);
 
   render();
 
