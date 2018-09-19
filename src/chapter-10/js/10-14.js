@@ -25,7 +25,6 @@ function init() {
   var sphere = new THREE.SphereGeometry(8, 180, 180)
   var sphereMaterial = new THREE.MeshStandardMaterial({
       alphaMap: textureLoader.load("../../assets/textures/alpha/partial-transparency.png"),
-      envMap: alternativeMap,
       metalness: 0.02,
       roughness: 0.07,
       color: 0xffffff,
