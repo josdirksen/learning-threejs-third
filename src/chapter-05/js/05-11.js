@@ -19,7 +19,6 @@ function init() {
     // the start geometry and material. Used as the base for the settings in the control UI
     this.appliedMaterial = applyMeshNormalMaterial
     this.castShadow = true;
-    this.groundPlaneVisible = true;
 
     this.radius = 10;
     this.detail = 0;
@@ -74,7 +73,6 @@ function init() {
   }).onChange(controls.redraw)
 
   gui.add(controls, 'castShadow').onChange(function(e) {controls.mesh.castShadow = e})
-  gui.add(controls, 'groundPlaneVisible').onChange(function(e) {groundPlane.material.visible = e})
 
   // initialize the first redraw so everything gets initialized
   controls.redraw();
