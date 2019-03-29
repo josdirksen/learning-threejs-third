@@ -22,7 +22,7 @@ function init() {
     this.castShadow = true;
     this.groundPlaneVisible = true;
 
-    this.amount = 2;
+    this.depth = 2;
     this.bevelThickness = 2;
     this.bevelSize = 0.5;
     this.bevelEnabled = true;
@@ -35,7 +35,7 @@ function init() {
     this.redraw = function () {
       redrawGeometryAndUpdateUI(gui, scene, controls, function() {
         var options = {
-          amount: controls.amount,
+          depth: controls.depth,
           bevelThickness: controls.bevelThickness,
           bevelSize: controls.bevelSize,
           bevelSegments: controls.bevelSegments,
@@ -43,7 +43,7 @@ function init() {
           curveSegments: controls.curveSegments,
           steps: controls.steps
         };
-  
+
         var geom = new THREE.ExtrudeGeometry(drawShape(), options);
         geom.applyMatrix(new THREE.Matrix4().makeTranslation(-20, 0, 0));
         geom.applyMatrix(new THREE.Matrix4().makeScale(0.4,0.4,0.4));
@@ -53,7 +53,7 @@ function init() {
   };
 
   var gui = new dat.GUI();
-  gui.add(controls, 'amount', 0, 20).onChange(controls.redraw);
+  gui.add(controls, 'depth', 0, 20).onChange(controls.redraw);
   gui.add(controls, 'bevelThickness', 0, 10).onChange(controls.redraw);
   gui.add(controls, 'bevelSize', 0, 10).onChange(controls.redraw);
   gui.add(controls, 'bevelSegments', 0, 30).step(1).onChange(controls.redraw);
